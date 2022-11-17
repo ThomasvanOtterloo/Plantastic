@@ -1,0 +1,92 @@
+
+
+
+a {
+  color: #000;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+
+
+.services {
+  padding: 60px 0;
+  background: #cfba83;
+}
+
+.services .service-item {
+
+  background: #97a76e;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.card-content{
+  padding: 10px;
+  background-color: #E2DFD2;
+}
+
+.card-image {
+  background-color: #2b2b28;
+  height: 300px;
+  width: 100%;
+  background-size: cover;
+  border-radius: 15px 15px 0 0;
+}
+
+
+.services .service-item .icon {
+
+  position: initial;
+}
+
+.services .service-item .icon i {
+  color: var(--color-default);
+  font-size: 18px;
+  transition: ease-in-out 0.3s;
+  z-index: 2;
+  position:absolute;
+
+
+}
+
+
+
+.services .service-item h3 {
+  color: var(--color-default);
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  padding-bottom: 8px;
+  font-size: 22px;
+  position: relative;
+  display: inline-block;
+  border-bottom: 4px solid #eeeeee;
+  transition: 0.3s;
+}
+
+.services .service-item p {
+  line-height: 18px;
+  font-size: 18px;
+  margin-bottom: 0;
+}
+
+.services .service-item .readmore {
+  margin-top: 15px;
+  color: #cfba83;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: -5px;
+  margin-right: -5px;
+  font-size: 20px;
+}
+
+
+
+.services .service-item:hover .icon:before {
+  background: #00b6a1;
+}
+
+.services .service-item:hover h3 {
+  border-color: var(--color-primary);
+}

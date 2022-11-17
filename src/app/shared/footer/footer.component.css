@@ -1,0 +1,10 @@
+.card-footer {
+  background-color: #FFDEAD;
+  border-top: 1px solid #e7e7e7;
+  padding: 1.25rem;
+}
+
+i{
+  color: #6c757d;
+  font-size: 15px;
+}

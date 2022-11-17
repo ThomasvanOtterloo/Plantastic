@@ -1,0 +1,11 @@
+.content{
+  position: relative;
+  top: 40%;
+  left: 40%;
+}
+
+.detail-buttons{
+  padding: 25px;
+  margin: 0px 20px 0px 20px;
+  background-color: #FCF5E5;
+}

@@ -1,0 +1,44 @@
+<div class="row">
+
+  <div class="col-5">
+    <h1>{{product?.name}}</h1>
+    <img [src]="product?.image" alt="product image" class="img-fluid">
+  </div>
+
+  <div class="col-7">
+    <h2>Product information:</h2>
+    <p>{{product?.description}}</p>
+    <p>{{product?.price}}</p>
+
+    <h2>Category:</h2>
+    <p>{{product?.category}}</p>
+  </div>
+</div>
+
+<div class="detail-buttons">
+  <div class="row">
+    <div class="col-3">
+      <button class="btn btn-primary" routerLink="/sellers" routerLinkActive="active" ariaCurrentWhenActive="page">
+        Back
+      </button>
+    </div>
+    <div class="col-3">
+      <button class="btn btn-dark" (click)="edit()">Edit</button>
+    </div>
+    <div class="col-3">
+      <button class="btn btn-danger" (click)="delete()">Delete</button>
+    </div>
+
+    <div class="col-3">
+      <button class="btn btn-light">Order</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="reviews">
+  <h2>Reviews:</h2>
+  <app-review></app-review>
+</div>
+
+

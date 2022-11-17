@@ -1,0 +1,44 @@
+
+<h2> You are now creating your own Plant</h2>
+<div *ngIf="product">
+  <div>
+    <div class="row">
+      <div class="col-4">
+
+        <label class="inp" for="name">
+          <input id="name" type="text" [(ngModel)]="product.name">
+          <span class="label">Name of plant</span>
+          <span class="focus-bg"></span>
+        </label>
+
+
+
+        <label class="inp" for="inp">
+          <input placeholder="" id="inp" type="text" [(ngModel)]="product.description">
+          <span class="label">Description</span>
+          <span class="focus-bg"></span>
+        </label>
+
+        <label class="inp" for="inp">
+          <input placeholder="" id="inp" type="number" [(ngModel)]="product.price">
+          <span class="label">Price</span>
+          <span class="focus-bg"></span>
+        </label>
+
+        <label class="inp" for="inp">
+          <input placeholder="" id="inp" type="text" [(ngModel)]="product.image">
+          <span class="label">image link</span>
+          <span class="focus-bg"></span>
+        </label>
+
+        <app-multiple-selecter></app-multiple-selecter>
+
+      </div>
+    </div>
+
+
+    <button class="btn btn-primary" routerLink="/sellers" routerLinkActive="active" ariaCurrentWhenActive="page" >Back</button>
+    <button class="btn btn-light" (click)="create()">Create Product</button>
+
+  </div>
+</div>

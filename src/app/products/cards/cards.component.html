@@ -1,0 +1,53 @@
+<div class="row">
+  <div class="col-md-4">
+    <app-search-filter (searchTextChanged)="onSearchTextEntered($event)"></app-search-filter>
+  </div>
+
+  <div class="col-md-3">
+    <app-multiple-selecter></app-multiple-selecter>
+  </div>
+
+  <div class="col-md-3">
+    <button class="btn btn-primary"
+            routerLink="create"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+    >Sell your own plants?</button>
+  </div>
+</div>
+
+
+<div class="row gy-4" data-aos="fade-up" data-aos-delay="100">
+  <div class="col-lg-4 col-md-6" *ngFor="let item of products">
+    <div *ngIf="searchText === '' || item.name.toLowerCase().includes(searchText)">
+      <div class="service-item  position-relative">
+
+        <a routerLink="{{ item.id }}"
+           routerLinkActive="active"
+           ariaCurrentWhenActive="page">
+
+          <img class="card-image" [src]="item?.image" alt="image"/>
+
+          <div class="card-content">
+            <div class="row">
+              <div class="col-8">
+                <div class="icon">
+                  <h3 class="card-title">{{item.name}}</h3>
+                </div>
+              </div>
+
+              <div class="col-4">
+                <div class="icon">
+                  <i style="right: 3px;">{{item.price}}</i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
