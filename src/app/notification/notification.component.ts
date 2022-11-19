@@ -9,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
     </div>
   `,
   styles: [
-    ".notification-div{margin: 10px; padding: 10px; background-color: #FAD7A0; text-align: center; border: 1px solid #ccc; border-radius: 4px;}, p{font-size: 14px;}"
+    ".notification-div{margin: 10px; padding: 10px; background-color: #FAD7A0; text-align: center; border: 1px solid #ccc; border-radius: 4px;} p{font-size: 14px;}"
 
   ]
 })
