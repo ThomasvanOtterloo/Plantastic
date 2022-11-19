@@ -9,35 +9,25 @@ import {CategoryService} from "../../category.service";
   styleUrls: ['./multiple-selecter.component.css']
 })
 export class MultipleSelecterComponent implements OnInit {
-  categories: Category[] = [];
-
   constructor(private _categories: CategoryService) {
   }
 
   ngOnInit(): void {
-    this.toppingList = this._categories.GetCategories();
+    this.categoryList = this._categories.GetCategories();
   }
 
-  ngOnChange() {
-    console.log(this.value)
+  @Output('getSelectedValues') EventEmitter = new EventEmitter<Category[]>();
+
+  sendData(categories: Category[]) {
+    this.EventEmitter.emit(categories);
   }
+  categories = new FormControl('');
+  categoryList: string[] = [];
+  selectedCategories: Category[] = [];
 
-  @Input()
-  value: Category[] = [];
-
-  @Output()
-  category: EventEmitter<[]> = new EventEmitter<[]>();
-
-  toppings = new FormControl('');
-  toppingList: string[] = [];
-
-
-
-
-
-
-
-
-
+  onChange(value: Category[]) {
+    this.selectedCategories = value;
+    this.sendData(this.selectedCategories);
+  }
 }
 
