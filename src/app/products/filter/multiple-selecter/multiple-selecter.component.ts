@@ -9,6 +9,8 @@ import {CategoryService} from "../../category.service";
   styleUrls: ['./multiple-selecter.component.css']
 })
 export class MultipleSelecterComponent implements OnInit {
+  selectedAtleastOne: boolean = false;
+
   constructor(private _categories: CategoryService) {
   }
 
@@ -19,7 +21,13 @@ export class MultipleSelecterComponent implements OnInit {
   @Output('getSelectedValues') EventEmitter = new EventEmitter<Category[]>();
 
   sendData(categories: Category[]) {
-    this.EventEmitter.emit(categories);
+    if (categories.length > 0) {
+        this.selectedAtleastOne = true;
+        this.EventEmitter.emit(categories);
+    }
+    else {
+        this.selectedAtleastOne = false;
+    }
   }
   categories = new FormControl('');
   categoryList: string[] = [];

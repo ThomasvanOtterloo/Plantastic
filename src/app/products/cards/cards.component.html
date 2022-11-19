@@ -4,7 +4,20 @@
   </div>
 
   <div class="col-md-3">
-    <app-multiple-selecter></app-multiple-selecter>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Type of plant</mat-label>
+        <mat-select [ngModel]="selectedCategories" #category (ngModelChange)="onChange($event)"[formControl]="categories" multiple>
+          <mat-select-trigger>
+            {{categories.value?.[0] || ''}}
+            <span *ngIf="(categories.value?.length || 0) > 1" class="example-additional-selection">
+            (+{{(categories.value?.length || 0) - 1}} {{categories.value?.length === 2 ? 'other' : 'others'}})
+          </span>
+          </mat-select-trigger>
+          <mat-option [value]="category" *ngFor="let category of categoryList" [value]="category">{{category}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
 
   <div class="col-md-3">

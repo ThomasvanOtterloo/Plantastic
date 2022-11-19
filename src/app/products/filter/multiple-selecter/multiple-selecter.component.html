@@ -2,7 +2,7 @@
  <div>
     <mat-form-field appearance="fill">
       <mat-label>Type of plant</mat-label>
-      <mat-select [ngModel]="selectedCategories" (ngModelChange)="onChange($event)"[formControl]="categories" multiple>
+      <mat-select [ngModel]="selectedCategories" #category (ngModelChange)="onChange($event)"[formControl]="categories" multiple>
         <mat-select-trigger>
           {{categories.value?.[0] || ''}}
           <span *ngIf="(categories.value?.length || 0) > 1" class="example-additional-selection">
@@ -12,5 +12,9 @@
         <mat-option [value]="category" *ngFor="let category of categoryList" [value]="category">{{category}}</mat-option>
       </mat-select>
     </mat-form-field>
+
+     <div *ngIf="!selectedAtleastOne" class="alert">
+         Select atleast 1 category.
+     </div>
  </div>
 
