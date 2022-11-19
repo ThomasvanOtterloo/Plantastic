@@ -2,14 +2,15 @@
  <div>
     <mat-form-field appearance="fill">
       <mat-label>Type of plant</mat-label>
-      <mat-select [formControl]="toppings" multiple>
+      <mat-select [ngModel]="selectedCategories" (ngModelChange)="onChange($event)"[formControl]="categories" multiple>
         <mat-select-trigger>
-          {{toppings.value?.[0] || ''}}
-          <span *ngIf="(toppings.value?.length || 0) > 1" class="example-additional-selection">
-            (+{{(toppings.value?.length || 0) - 1}} {{toppings.value?.length === 2 ? 'other' : 'others'}})
+          {{categories.value?.[0] || ''}}
+          <span *ngIf="(categories.value?.length || 0) > 1" class="example-additional-selection">
+            (+{{(categories.value?.length || 0) - 1}} {{categories.value?.length === 2 ? 'other' : 'others'}})
           </span>
         </mat-select-trigger>
-        <mat-option *ngFor="let topping of toppingList" [value]="topping">{{topping}}</mat-option>
+        <mat-option [value]="category" *ngFor="let category of categoryList" [value]="category">{{category}}</mat-option>
       </mat-select>
     </mat-form-field>
  </div>
+

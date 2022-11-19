@@ -1,3 +1,9 @@
+.alert{
+  color: red;
+  margin-top: -20px;
+  margin-bottom: -20px;
+}
+
 .example-additional-selection {
   opacity: 0.75;
   font-size: 0.75em;

@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {ProductService} from "../product.service";
-import {Product} from "../component-product-model";
+import {Category, Product} from "../component-product-model";
 
 
 @Component({
@@ -29,4 +29,9 @@ export class EditFormComponent implements OnInit {
       this.router.navigate(['/sellers']);
     });
   }
+
+    getSelectedValues($event: Category[]) {
+        this.product!.category = $event;
+        console.log(this.product?.category  + "got the data from child!");
+    }
 }
