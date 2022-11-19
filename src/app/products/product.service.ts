@@ -37,6 +37,26 @@ export class ProductService {
       category: [Category.petFriendly, Category.aitPurifying],
       dateCreated: new Date()
     },
+    {
+      id: 4,
+      name: 'product 4',
+      description: 'product 3 description',
+      price: 300,
+      quantity: 30,
+      image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',
+      category: [Category.petFriendly, Category.aitPurifying],
+      dateCreated: new Date()
+    },
+    {
+      id: 5,
+      name: 'product 5',
+      description: 'product 3 description',
+      price: 300,
+      quantity: 30,
+      image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',
+      category: [Category.petFriendly, Category.aitPurifying],
+      dateCreated: new Date()
+    },
   ];
 
 
@@ -81,7 +101,11 @@ export class ProductService {
 
   save(param: Product ) {
     return new Promise((resolve) => {
-      this.products.push(param);
+        for (let i = 0; i < this.products.length; i++) {
+          if (this.products[i].id === param.id) {
+            this.products[i] = param;
+          }
+        }
       resolve(true);
     });
   };
