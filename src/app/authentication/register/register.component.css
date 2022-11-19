@@ -3,6 +3,11 @@
   font-size: 0.75em;
 }
 
+.alert{
+  color: red;
+  margin-top: -30px;
+  margin-bottom: -20px;
+}
 
 .inp {
   position: relative;

@@ -10,27 +10,34 @@ import {Router} from "@angular/router";
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-  user: User | undefined;
-  password: string | undefined;
-  confirmPassword: string | undefined;
+  public user: User = new User(0, '', '');
+  public password: string | undefined;
+  public confirmPassword: string | undefined;
+  public passwordsMatch: boolean = true;
 
   constructor(
     private _userService: UserService,
     private router: Router
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
   }
 
   register() {
-    if (this.password === this.confirmPassword) {
+    console.log(this.user.password + ' ' + this.confirmPassword);
+    if (this.user.password === this.confirmPassword) {
       this.user!.password = this.password;
       this._userService.create(this.user!);
+      this.passwordsMatch = true;
       this.router.navigate(['/sellers']);
     } else {
       console.log('Passwords do not match');
+      this.passwordsMatch = false;
+      console.log(this.passwordsMatch);
     }
   }
+
 
 
 }
