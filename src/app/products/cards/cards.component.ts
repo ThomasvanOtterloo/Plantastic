@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {UserService} from "../../authentication/user.service";
 import {ProductService} from "../product.service";
+import {FormControl} from "@angular/forms";
+import {Category} from "../component-product-model";
+import {CategoryService} from "../category.service";
 
 @Component({
   selector: 'app-cards',
@@ -11,13 +14,16 @@ export class CardsComponent implements OnInit {
   public user:any  = [];
   public category: any = [];
   public products: any = [];
+  public categories = new FormControl('');
+  public categoryList: string[] = [];
+  public selectedCategories: Category[] = [];
 
 
-
-  constructor(private _userService: UserService, private _productService: ProductService) { }
+  constructor(private _userService: UserService, private _productService: ProductService,private _categoryService: CategoryService) { }
   ngOnInit(): void {
     this.user = this._userService.getUsers();
     this.products = this._productService.getProducts();
+    this.categoryList = this._categoryService.GetCategories();
   }
 
   searchText: string = '';
@@ -25,6 +31,11 @@ export class CardsComponent implements OnInit {
   onSearchTextEntered(searchValue: string){
     this.searchText = searchValue;
     console.log(this.searchText);
+  }
+
+  onChange(value: Category[]) {
+    this.selectedCategories = value;
+    console.log(this.selectedCategories);
   }
 
 }
