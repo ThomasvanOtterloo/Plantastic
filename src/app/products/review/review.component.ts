@@ -39,10 +39,12 @@ export class ReviewComponent implements OnInit {
   }
 
 
+
   CreateReview() {
 
   }
   DeleteReview() {
     console.log('Delete Review');
+    // this._reviewService.deleteReview(this.product!.id);
   }
 }

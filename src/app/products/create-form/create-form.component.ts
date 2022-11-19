@@ -9,9 +9,7 @@ import {ProductService} from "../product.service";
   styleUrls: ['./create-form.component.css']
 })
 export class CreateFormComponent implements OnInit {
-  product: Product = { id: 0, name: '', description: '', price: 0, image: '', category: Category.beginner, dateCreated: new Date() };
-
-
+  product: Product = { id: 0, name: '', description: '', quantity:0, price: 0, image: '', category: [], dateCreated: new Date() };
 
   constructor(
     private route: ActivatedRoute,
@@ -20,15 +18,12 @@ export class CreateFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
   }
-
 
   create() {
     console.log(this.product);
     this._productService.create(this.product).then(() => {
       this.router.navigate(['/sellers']);
     });
-
   }
 }

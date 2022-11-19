@@ -37,12 +37,17 @@ export class ReviewService {
       }
     ];
 
-
   constructor() { }
 
-
   getReviewsByProductId(id: any) {
-    return this.reviews.filter((Review) => Review.productId === id);
+    let reviewsOfProduct: Review [] = [];
+    this.reviews.forEach((review) => {
+      if (review.productId === id) {
+        review.dateCreated = this.formatReviewDate(review.dateCreated);
+        reviewsOfProduct.push(review);
+      }
+    });
+    return reviewsOfProduct;
   }
 
   createReview(review: Review) {
@@ -56,5 +61,8 @@ export class ReviewService {
     this.reviews.splice(index, 1);
   }
 
+  formatReviewDate(date: Date) {
+    return date.toLocaleString('en-us',{month:'short', year:'numeric', day:'numeric'})
+  }
 
 }

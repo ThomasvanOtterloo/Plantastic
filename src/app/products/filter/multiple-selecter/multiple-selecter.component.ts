@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl} from "@angular/forms";
 import {Category} from "../../component-product-model";
 import {CategoryService} from "../../category.service";
@@ -9,6 +9,7 @@ import {CategoryService} from "../../category.service";
   styleUrls: ['./multiple-selecter.component.css']
 })
 export class MultipleSelecterComponent implements OnInit {
+  categories: Category[] = [];
 
   constructor(private _categories: CategoryService) {
   }
@@ -17,6 +18,12 @@ export class MultipleSelecterComponent implements OnInit {
     this.toppingList = this._categories.GetCategories();
   }
 
+  ngOnChange() {
+    console.log(this.value)
+  }
+
+  @Input()
+  value: Category[] = [];
 
   @Output()
   category: EventEmitter<[]> = new EventEmitter<[]>();

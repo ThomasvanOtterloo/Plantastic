@@ -12,8 +12,9 @@ export class ProductService {
       name: 'product 1',
       description: 'product 1 description',
       price: 100,
+      quantity: 10,
       image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',
-      category: Category.beginner,
+      category: [Category.beginner],
       dateCreated: new Date()
     },
     {
@@ -21,7 +22,9 @@ export class ProductService {
       name: 'product 2',
       description: 'product 2 description',
       price: 200,
-      image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',      category: Category.aitPurifying,
+      quantity: 20,
+      image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',
+      category: [Category.aitPurifying, Category.petFriendly],
       dateCreated: new Date()
     },
     {
@@ -29,7 +32,9 @@ export class ProductService {
       name: 'product 3',
       description: 'product 3 description',
       price: 300,
-      image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',      category: Category.petFriendly,
+      quantity: 30,
+      image: 'https://cdn.shopify.com/s/files/1/0150/6262/products/the-sill_bird-of-paradise_large_upcycled_stonewash.jpg?v=1660319820&width=400',
+      category: [Category.petFriendly, Category.aitPurifying],
       dateCreated: new Date()
     },
   ];
@@ -57,6 +62,9 @@ export class ProductService {
 
   public create(product: Product) {
     return new Promise((resolve) => {
+      if (product.image === '') {
+        product.image = 'https://static.vecteezy.com/system/resources/previews/002/425/076/non_2x/plant-leaves-in-a-pot-beautiful-green-houseplant-isolated-simple-trendy-flat-style-for-interior-garden-decoration-design-free-vector.jpg';
+      }
       this.products.push(product);
       resolve(true);
     });

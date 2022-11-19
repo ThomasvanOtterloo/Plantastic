@@ -1,44 +1,73 @@
-
-<h2> You are now editing your {{product?.name}} Plant</h2>
 <div *ngIf="product">
   <div>
-    <div class="row">
-      <div class="col-4">
+    <div class="edit-field row">
+      <div class="col-12">
+        <h2> You are now editing your {{product?.name}} Plant</h2>
 
-        <label class="inp" for="name">
-            <input id="name" type="text" [(ngModel)]="product.name">
-            <span class="label">Name of plant</span>
-            <span class="focus-bg"></span>
-          </label>
+        <div class="row">
 
 
+          <div class="input-field col-4">
+            <label class="inp" for="name">
+              <input id="name" type="text" [(ngModel)]="product.name" minlength="1">
+              <span class="label">Name of plant</span>
+              <span class="focus-bg"></span>
+            </label>
+          </div>
 
-          <label class="inp" for="inp">
-            <input placeholder="" id="inp" type="text" [(ngModel)]="product.description">
-            <span class="label">Description</span>
-            <span class="focus-bg"></span>
-          </label>
+          <div class="input-field col-2">
+            <label class="inp" for="inp">
+              <input placeholder="" id="inp" type="number" [(ngModel)]="product.price">
+              <span class="label">Price</span>
+              <span class="focus-bg"></span>
+            </label>
+          </div>
 
-          <label class="inp" for="inp">
-            <input placeholder="" id="inp" type="number" [(ngModel)]="product.price">
-            <span class="label">Price</span>
-            <span class="focus-bg"></span>
-          </label>
+          <div class="input-field col-2">
+            <label class="inp" for="inp">
+              <input placeholder="" id="inp" type="number" [(ngModel)]="product.quantity">
+              <span class="label">Quantity</span>
+              <span class="focus-bg"></span>
+            </label>
+          </div>
 
-          <label class="inp" for="inp">
-            <input placeholder="" id="inp" type="text" [(ngModel)]="product.image">
-            <span class="label">image link</span>
-            <span class="focus-bg"></span>
-          </label>
+          <div class="input-field col-4">
+            <app-multiple-selecter></app-multiple-selecter>
+          </div>
 
-          <app-multiple-selecter></app-multiple-selecter>
+          <div class="row">
+            <div class="input-field col-12" style="padding: 15px 0px 15px 0px;">
+              <label class="inp" for="inp" style="max-width: 70%;">
+                <input placeholder="" id="inp" type="text" [(ngModel)]="product.description">
+                <span class="label">Description</span>
+                <span class="focus-bg"></span>
+              </label>
 
+            </div>
+
+            <div class="input-field col-12" style="padding: 15px 0px 15px 0px;">
+              <label class="inp" for="inp" style="max-width: 70%;">
+                <input placeholder="" id="inp" type="text" [(ngModel)]="product.image">
+                <span class="label">image link</span>
+                <span class="focus-bg"></span>
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-12">
+        <div class="update">
+          <button class="btn btn-success" style="width: 30%" (click)="UpdateProduct()">Update Product</button>
+        </div>
+      </div>
 
-    <button class="btn btn-primary" routerLink="/sellers" routerLinkActive="active" ariaCurrentWhenActive="page" >Back</button>
-    <button class="btn btn-light" (click)="UpdateProduct()">Update Product</button>
+      <div class="col-12">
+        <button class="btn btn-primary" style="margin-top: -55px; margin-left: 10%; " routerLink="/sellers" routerLinkActive="active" ariaCurrentWhenActive="page" >Back</button>
+      </div>
 
+    </div>
   </div>
 </div>

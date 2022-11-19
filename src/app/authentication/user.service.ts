@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Gender, User} from "./component-user-model";
+import {User} from "./component-user-model";
 
 @Injectable({
   providedIn: 'root'
@@ -13,13 +13,13 @@ export class UserService {
       id: 1,
       email: 'John@gmail.com',
       password: '123456',
-      Gender : Gender.male
+      wallet: 100,
     },
     {
       id: 2,
       email: 'kees@gmail.com',
       password: '123456',
-      Gender : Gender.male
+      wallet: 100.55,
     }
 
   ];
@@ -39,5 +39,10 @@ export class UserService {
   }
 
 
+  create(user: User) {
+    this.users.push(user);
+    console.log(this.users);
 
+    console.log("user " +user+"created");
+  }
 }

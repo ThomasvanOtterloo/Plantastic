@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Product} from "../component-product-model";
 import {ProductService} from "../product.service";
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {OrderDialogComponent} from "../order-dialog/order-dialog.component";
 
 @Component({
   selector: 'app-details',
@@ -13,20 +15,17 @@ export class DetailsComponent implements OnInit {
   componentId: string | null | undefined;
   product: Product | undefined;
 
+  isFollowed: boolean = false;
+  follow:string = "Follow";
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private _productService: ProductService
+    private _productService: ProductService,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    /**
-     * We gebruiken de EditComponent om een bestaande record te wijzigen
-     * én om een nieuwe record te maken.
-     * Een bestaande record heeft een :id in de URL, bv '/users/1/edit'
-     * Als die er dus is gaan we de user ophalen en bewerken.
-     * Als er geen :id in de URL zit (via '/users/new') maken we een nieuwe record.
-     */
     this.route.paramMap.subscribe((params) => {
       this.componentId = params.get("id");
       if (this.componentId) {
@@ -59,4 +58,21 @@ export class DetailsComponent implements OnInit {
       console.log("Geen id");
     }
   }
+
+  OpenPopUp() {
+    console.log("OpenPopUp");
+  }
+
+  openDialog() {
+    const dialogRef = this.dialog.open(OrderDialogComponent, {
+      width: '250px',
+      data: {Product: this.product}
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      console.log('The dialog was closed');
+
+    });
+  }
+
 }

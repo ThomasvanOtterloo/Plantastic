@@ -1,0 +1,140 @@
+<div class="about">
+<div class="row">
+  <div class="col-sm-6 col-md-8 col-lg-9">
+    <h3 id="aboutTitle">Over deze applicatie</h3>
+    <p>
+      Deze applicatie is gemaakt in het kader van het vak 'Clientside web
+      frameworks' van Avans Hogeschool Breda.
+    </p>
+    <h1>Plantastic</h1>
+    <p>
+<!--      Hier beschrijft je wat je project inhoudt. Beschrijf ook de-->
+<!--      entiteiten/domeinobjecten die je gebruikt, en benoem per entiteit de-->
+<!--      attributen met hun datatype.-->
+
+      Het idee achter deze applicatie is dat iedereen zijn eigen planten kan verkopen en kopen. Gebruikers
+      kunnen elkaars planten bekijken en een review plaatsen om de planten die ze gekocht hebben. Als gebruiker
+      kan je andere gebruikers volgen om hun favoriete planten te bekijken. Als ik meer tijd had wilde ik graag een community
+      form maken waarbij de gebruikers elkaar kunnen helpen met hun planten met gebruik van posts en comments.
+
+    </p>
+  </div>
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="card">
+      <div
+        class="d-flex justify-content-center align-items-center px-3 py-3"
+      >
+        <!-- Je mag een foto van jezelf toevoegen, maar dat is niet verplicht. -->
+        <img
+          src="assets/person.png"
+          class="card-img-top rounded-circle border profile-pic px-4 py-4"
+          alt="..."
+        />
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Thomas van Otterloo</h5>
+        <p class="card-text">Studentnummer: 2186082</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Entiteiten</h3>
+<p>
+  Hier geef je een toelichting op je entiteiten. Voeg ook een afbeelding van
+  je model toe zoals dat bij NoSql gevraagd wordt.
+
+  Door Plantastic functioneel te maken voor gebruikers zijn er een aantal entiteiten die ik nodig heb.
+  De entiteiten die ik heb gebruikt zijn User, Product, Order, Review en Category.
+
+</p>
+
+<img src="assets/J2P2.png" class="px-5 py-5" alt="ERD" style="width: 100%; margin-left: -20px" />
+
+<div class="row">
+  <div class="col-sm-12 col-md-4">
+    <p>Product</p>
+    <ul>
+      <li>id: string</li>
+      <li>name: string</li>
+      <li>description: string</li>
+      <li>price: number</li>
+      <li>image: string</li>
+      <li>Category: Category</li>
+    </ul>
+  </div>
+  <div class="col-sm-12 col-md-4">
+    <p>Review</p>
+    <ul>
+      <li>Author: User</li>
+      <li>Description: string</li>
+      <li>Rating: number</li>
+      <li>Date: Date</li>
+    </ul>
+  </div>
+  <div class="col-sm-12 col-md-4">
+    <p>Order</p>
+    <ul>
+      <li>Total: number</li>
+      <li>Delivery: Date</li>
+      <li>Quantity: number</li>
+    </ul>
+  </div>
+</div>
+
+
+
+<div class="row">
+  <div class="col">
+    <h3>Userstories</h3>
+    <p>
+      Hier verwoord je in de vorm van userstories de functionaliteit van
+      jouw applicatie.
+    </p>
+
+    <table class="table table-bordered">
+      <thead>
+      <th>Nr</th>
+      <th class="col-6">Userstory</th>
+      <th>Evt toelichting</th>
+      </thead>
+      <tbody>
+      <tr>
+        <td>1</td>
+        <td>
+          Als gebruiker wil ik een overzicht van movies kunnen
+          raadplegen, zodat ik kan zien welke movies op dit moment
+          beschikbaar zijn.
+        </td>
+        <td>Overzicht is een grid.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>
+          Als ingelogde gebruiker wil ik zelf een movie kunnen
+          toevoegen, zodat ik mijn movies in het systeem kan
+          invoeren.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>
+          Als ingelogde gebruiker wil ik mijn eigen movies kunnen
+          bewerken en verwijderen, zodat ik mijn informatie
+          up-to-date kan houden.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>
+          <p>Voeg zelf meer userstories toe.</p>
+        </td>
+        <td></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>

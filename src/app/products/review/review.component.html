@@ -1,73 +1,73 @@
-<span>review works</span>
+<div style="padding: 10px">
+  <h2 *ngIf="reviewsOfProduct.length > 0">Reviews:</h2>
+  <h2 *ngIf="reviewsOfProduct.length === 0">Reviews: No reviews of this product yet</h2>
+</div>
 
-<div class="row">
-  <div class="col-12">
-    <div class="review">
-      <div *ngFor="let review of reviewsOfProduct" class="review-box">
+<div class="review">
+  <div class="row">
+  <div *ngFor="let review of reviewsOfProduct" class="review-box col-6">
 
-        <div class="row">
-          <div class="col-4">
+    <div class="row">
+      <div class="col-4">
 
-            <div *ngIf="!editMode">
-              <h3>{{review.author}}</h3>
-            </div>
-            <div *ngIf="editMode">
-              <label class="inp" for="inp">
-                <input placeholder="{{review.author}}" id="inp" type="text">
-              </label>
-            </div>
-
-          </div>
-
-          <div class="col-4">
-            <div *ngIf="!editMode">
-              <ngb-rating class="rating" [rate]="review.rating" [readonly]="true"></ngb-rating>
-            </div>
-
-            <div *ngIf="editMode">
-              <ngb-rating class="rating" [rate]="review.rating" [readonly]="false" style="color: grey"></ngb-rating>
-            </div>
-          </div>
-
-          <div class="col-1">
-            <div *ngIf="!editMode">
-              <img
-                class="icon"
-                src="/assets/png-clipart-computer-icons-editing-edit-icon-cdr-angle-removebg-preview.png"
-                style="margin-top: -35px;"
-                (click)="editMode = true"
-              >
-            </div>
-
-            <div *ngIf="editMode">
-              <button class="btn btn-primary" type="button" (click)="editMode = false" style="margin-top: -15px;">Save
-              </button>
-            </div>
-          </div>
-
-          <div class="col-1">
-            <img class="icon" (click)="DeleteReview()" src="/assets/delete-icon-removebg-preview.png"
-                 style="height: 40px; margin-top: -40px;">
-          </div>
+        <div *ngIf="!editMode">
+          <h3>{{review.author}}</h3>
         </div>
-
-
-        <div class="review-text">
-          <div *ngIf="!editMode">
-            <p>{{review.description}}</p>
-          </div>
-
-          <div *ngIf="editMode">
-            <input placeholder="{{review.description}}" id="inp" type="text">
-          </div>
-        </div>
-
-        <div class="review-date text-end">
-          <p>{{review.dateCreated}}</p>
+        <div *ngIf="editMode">
+          <label class="inp" for="inp">
+            <input placeholder="{{review.author}}" id="inp" type="text">
+          </label>
         </div>
 
       </div>
 
+      <div class="col-4">
+        <div *ngIf="!editMode">
+          <ngb-rating class="rating" [rate]="review.rating" [readonly]="true"></ngb-rating>
+        </div>
+
+        <div *ngIf="editMode">
+          <ngb-rating class="rating" [rate]="review.rating" [readonly]="false" style="color: grey"></ngb-rating>
+        </div>
+      </div>
+
+      <div class="col-1">
+        <div *ngIf="!editMode">
+          <img
+            class="icon"
+            src="/assets/png-clipart-computer-icons-editing-edit-icon-cdr-angle-removebg-preview.png"
+
+            (click)="editMode = true"
+          >
+        </div>
+
+        <div *ngIf="editMode">
+          <button class="btn btn-primary" type="button" (click)="editMode = false" >Save
+          </button>
+        </div>
+      </div>
+
+      <div class="col-1">
+        <img class="icon" (click)="DeleteReview()" src="/assets/delete-icon-removebg-preview.png">
+      </div>
     </div>
+
+
+    <div class="review-text">
+      <div *ngIf="!editMode">
+        <p>{{review.description}}</p>
+      </div>
+
+      <div *ngIf="editMode">
+        <input placeholder="{{review.description}}" id="inp" type="text">
+      </div>
+    </div>
+
+    <div class="review-date text-end">
+      <p>{{review.dateCreated}}</p>
+    </div>
+
+  </div>
   </div>
 </div>
+

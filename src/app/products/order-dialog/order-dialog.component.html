@@ -1,0 +1,14 @@
+<h1 mat-dialog-title>Ordering Product: </h1>
+<div mat-dialog-content>
+  <p>Are you sure you want to buy this product?</p>
+  <p>You currently have ${{wallet}} left in your wallet.</p>
+  <p>Total: {{total}} </p>
+</div>
+<div>
+  <input type="number" [(ngModel)]="quantity">
+</div>
+<div mat-dialog-actions>
+  <button mat-button class="btn btn-danger" (click)="onNoClick()">No Thanks</button>
+  <button mat-button class="btn btn-primary" >Ok</button>
+</div>
+

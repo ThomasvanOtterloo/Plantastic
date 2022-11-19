@@ -1,35 +1,60 @@
-<div class="login">
+<!--<div class="login">-->
+<!--  <div class="login-content">-->
+<!--    <div>-->
+
+<!--      <h2 class="text-center">Register</h2>-->
 
 
+<!--      <form #registerForm=ngForm name="form" (ngSubmit)="register()">-->
 
-  <div class="login-content">
-    <form>
+<!--        <label class="inp col-12" for="inp">-->
+<!--          <input placeholder=""-->
+<!--                 type="text"-->
+<!--                 name="email"-->
+<!--                 [(ngModel)]="user!.email"-->
+<!--                 #email="ngModel"-->
+<!--                 minlength="3"-->
+<!--                 required-->
+<!--                 [ngClass]="{ 'is-invalid': email.invalid && email.touched }"-->
+<!--          />-->
+<!--          <span class="label">Email</span>-->
+<!--          <span class="focus-bg"></span>-->
+<!--        </label>-->
 
-      <h2 class="text-center">Register</h2>
-      <label class="inp col-12" for="inp">
-        <input placeholder="" id="inp" type="text">
-        <span class="label">Email</span>
-        <span class="focus-bg"></span>
-      </label>
+<!--        <div-->
+<!--          *ngIf="email.invalid && email.touched"-->
+<!--          class="invalid-feedback"-->
+<!--        >-->
 
-      <label class="inp col-12" for="inp">
-        <input placeholder="" id="inp" type="password">
-        <span class="label">Password</span>
-        <span class="focus-bg"></span>
-      </label>
+<!--          <div *ngIf="email.errors!['required']">-->
+<!--            Email is required.-->
+<!--          </div>-->
 
-      <label class="inp col-12" for="inp">
-        <input placeholder="" id="inp" type="password">
-        <span class="label">Confirm Password</span>
-        <span class="focus-bg"></span>
-      </label>
+<!--          <div *ngIf="email.errors!['minlength']">-->
+<!--            Email requires at least 4 characters.-->
+<!--          </div>-->
 
-      <button>
-        REGISTER
-      </button>
+<!--          <label class="inp col-12" for="inp">-->
+<!--            <input placeholder="" id="inp" type="password" [(ngModel)]="password">-->
+<!--            <span class="label">Password</span>-->
+<!--            <span class="focus-bg"></span>-->
+<!--          </label>-->
 
-    </form>
-  </div>
-</div>
+<!--          <label class="inp col-12" for="inp">-->
+<!--            <input placeholder="" id="inp" type="password" [(ngModel)]="confirmPassword">-->
+<!--            <span class="label">Confirm Password</span>-->
+<!--            <span class="focus-bg"></span>-->
+<!--          </label>-->
+
+<!--          <button (click)="register()" [disabled]="!registerForm.valid" ]>-->
+<!--            REGISTER-->
+<!--          </button>-->
+<!--        </div>-->
+
+<!--      </form>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
 
 
+<!--&lt;!&ndash; &ndash;&gt;-->

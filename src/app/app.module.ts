@@ -12,19 +12,26 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReviewComponent } from './products/review/review.component';
 import { SearchFilterComponent } from './products/filter/search-filter/search-filter.component';
 import { CreateFormComponent } from './products/create-form/create-form.component';
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {MatSelectModule} from '@angular/material/select';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatNativeDateModule} from '@angular/material/core';
-import {RouterModule, Routes} from "@angular/router";
+import { MatFormFieldModule} from "@angular/material/form-field";
+import { MatSelectModule} from '@angular/material/select';
+import { FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { MatNativeDateModule} from '@angular/material/core';
+import { RouterModule, Routes} from "@angular/router";
 import { LoginComponent } from './authentication/login/login.component';
 import { HomeComponent } from './home/home.component';
 import { RegisterComponent } from './authentication/register/register.component';
 import { MultipleSelecterComponent } from './products/filter/multiple-selecter/multiple-selecter.component';
-import {UserService} from "./authentication/user.service";
+import { UserService} from "./authentication/user.service";
 import { DetailsComponent } from './products/details/details.component';
 import { SellersComponent } from './products/sellers/sellers.component';
 import { EditFormComponent } from './products/edit-form/edit-form.component';
+import { OrderDialogComponent } from './products/order-dialog/order-dialog.component';
+import { AboutComponent } from './about/about.component';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialogModule} from '@angular/material/dialog';
+import { IncludeFriendsCheckboxComponent } from './products/filter/include-friends-checkbox/include-friends-checkbox.component';
+import {MAT_CHECKBOX_DEFAULT_OPTIONS, MatCheckboxDefaultOptions} from "@angular/material/checkbox";
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -43,6 +50,7 @@ const routes: Routes = [
     pathMatch: "full",
     component: EditFormComponent,
   },
+  {path: 'about', component: AboutComponent},
 ]
 
 
@@ -65,6 +73,9 @@ const routes: Routes = [
     DetailsComponent,
     SellersComponent,
     EditFormComponent,
+    OrderDialogComponent,
+    AboutComponent,
+    IncludeFriendsCheckboxComponent,
   ],
   imports: [
     BrowserModule,
@@ -76,14 +87,19 @@ const routes: Routes = [
     MatSelectModule,
     MatNativeDateModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(routes)
+    MatDialogModule,
+    MatCheckboxModule,
+    RouterModule.forRoot(routes),
   ],
   exports: [
     RouterModule
   ],
 
   providers: [
-    UserService
+    UserService,
+    {provide: MatDialogRef, useValue: {}},
+    {provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'check' } as MatCheckboxDefaultOptions},
+
   ],
   bootstrap: [AppComponent]
 })
