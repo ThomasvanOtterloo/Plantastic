@@ -2,13 +2,13 @@
 
 export class User {
   id: number | undefined;
-  email: string | undefined;
+  username: string | undefined;
   password: string | undefined;
   wallet: number | undefined;
 
-  constructor(id: number, email: string, password: string) {
+  constructor(id: number, username: string, password: string) {
     this.id = id;
-    this.email = email;
+    this.username = username;
     this.password = password;
   }
 

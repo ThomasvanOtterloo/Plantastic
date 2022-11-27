@@ -110,19 +110,22 @@ let AuthController = class AuthController {
     }
     register(credentials) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log('register', credentials);
             try {
-                yield this.authService.registerUser(credentials.username, credentials.password, credentials.emailAddress);
+                yield this.authService.registerUser(credentials.username, credentials.password);
+                console.log('register succeeded');
                 return {
-                    id: yield this.authService.createUser(credentials.username, credentials.emailAddress),
+                    id: yield this.authService.createUser(credentials.username),
                 };
             }
             catch (e) {
-                throw new common_1.HttpException('Username invalid', common_1.HttpStatus.BAD_REQUEST);
+                throw new common_1.HttpException('Username invalid' + e, common_1.HttpStatus.BAD_REQUEST);
             }
         });
     }
     login(credentials) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log('login inside controller', credentials);
             try {
                 return {
                     token: yield this.authService.generateToken(credentials.username, credentials.password)
@@ -145,7 +148,7 @@ tslib_1.__decorate([
     (0, common_1.Post)('login'),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof data_1.UserCredentials !== "undefined" && data_1.UserCredentials) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof data_1.UserRegistration !== "undefined" && data_1.UserRegistration) === "function" ? _d : Object]),
     tslib_1.__metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], AuthController.prototype, "login", null);
 AuthController = tslib_1.__decorate([
@@ -210,9 +213,9 @@ let AuthService = class AuthService {
         this.identityModel = identityModel;
         this.userModel = userModel;
     }
-    createUser(name, emailAddress) {
+    createUser(username) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = new this.userModel({ name, emailAddress });
+            const user = new this.userModel({ username });
             yield user.save();
             return user.id;
         });
@@ -229,10 +232,11 @@ let AuthService = class AuthService {
             });
         });
     }
-    registerUser(username, password, emailAddress) {
+    registerUser(username, password) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const generatedHash = yield (0, bcrypt_1.hash)(password, parseInt(process.env.SALT_ROUNDS, 10));
-            const identity = new this.identityModel({ username, hash: generatedHash, emailAddress });
+            const identity = new this.identityModel({ username, hash: generatedHash });
+            console.log('registerUser', identity);
             yield identity.save();
         });
     }
@@ -272,7 +276,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IdentitySchema = exports.Identity = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const mongoose_1 = __webpack_require__("@nestjs/mongoose");
-const isEmail_1 = tslib_1.__importDefault(__webpack_require__("validator/lib/isEmail"));
 let Identity = class Identity {
 };
 tslib_1.__decorate([
@@ -286,17 +289,6 @@ tslib_1.__decorate([
     (0, mongoose_1.Prop)({ required: true }),
     tslib_1.__metadata("design:type", String)
 ], Identity.prototype, "hash", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        required: true,
-        unique: true,
-        validate: {
-            validator: isEmail_1.default,
-            message: 'should be a valid email address',
-        }
-    }),
-    tslib_1.__metadata("design:type", String)
-], Identity.prototype, "emailAddress", void 0);
 Identity = tslib_1.__decorate([
     (0, mongoose_1.Schema)()
 ], Identity);
@@ -370,15 +362,18 @@ exports.DataModule = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const common_1 = __webpack_require__("@nestjs/common");
 const mongoose_1 = __webpack_require__("@nestjs/mongoose");
-const topic_controller_1 = __webpack_require__("./apps/data-api/src/app/topic/topic.controller.ts");
-const meetup_service_1 = __webpack_require__("./apps/data-api/src/app/meetup/meetup.service.ts");
-const topic_service_1 = __webpack_require__("./apps/data-api/src/app/topic/topic.service.ts");
+// import { TopicController } from './topic/topic.controller';
+// import { MeetupService } from './meetup/meetup.service';
+// import { TopicService } from './topic/topic.service';
+const product_service_1 = __webpack_require__("./apps/data-api/src/app/product/product.service.ts");
 const user_service_1 = __webpack_require__("./apps/data-api/src/app/user/user.service.ts");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
-const topic_schema_1 = __webpack_require__("./apps/data-api/src/app/topic/topic.schema.ts");
-const meetup_schema_1 = __webpack_require__("./apps/data-api/src/app/meetup/meetup.schema.ts");
+// import { Topic, TopicSchema } from './topic/topic.schema';
+// import { Meetup, MeetupSchema } from './meetup/meetup.schema';
+const product_schema_1 = __webpack_require__("./apps/data-api/src/app/product/product.schema.ts");
 const user_controller_1 = __webpack_require__("./apps/data-api/src/app/user/user.controller.ts");
-const meetup_controller_1 = __webpack_require__("./apps/data-api/src/app/meetup/meetup.controller.ts");
+const product_controller_1 = __webpack_require__("./apps/data-api/src/app/product/product.controller.ts");
+// import { MeetupController } from './meetup/meetup.controller';
 let DataModule = class DataModule {
 };
 DataModule = tslib_1.__decorate([
@@ -386,19 +381,22 @@ DataModule = tslib_1.__decorate([
         imports: [
             mongoose_1.MongooseModule.forFeature([
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
-                { name: topic_schema_1.Topic.name, schema: topic_schema_1.TopicSchema },
-                { name: meetup_schema_1.Meetup.name, schema: meetup_schema_1.MeetupSchema }
+                { name: product_schema_1.Product.name, schema: product_schema_1.ProductSchema },
+                // { name: Topic.name, schema: TopicSchema },
+                // { name: Meetup.name, schema: MeetupSchema }
             ]),
         ],
         controllers: [
-            meetup_controller_1.MeetupController,
-            topic_controller_1.TopicController,
+            // MeetupController,
+            // TopicController,
             user_controller_1.UserController,
+            product_controller_1.ProductController
         ],
         providers: [
             user_service_1.UserService,
-            topic_service_1.TopicService,
-            meetup_service_1.MeetupService,
+            product_service_1.ProductService,
+            // TopicService,
+            // MeetupService,
         ],
     })
 ], DataModule);
@@ -407,363 +405,41 @@ exports.DataModule = DataModule;
 
 /***/ }),
 
-/***/ "./apps/data-api/src/app/meetup/meetup.controller.ts":
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MeetupController = void 0;
-const tslib_1 = __webpack_require__("tslib");
-const common_1 = __webpack_require__("@nestjs/common");
-const meetup_service_1 = __webpack_require__("./apps/data-api/src/app/meetup/meetup.service.ts");
-const data_1 = __webpack_require__("./libs/data/src/index.ts");
-const token_decorator_1 = __webpack_require__("./apps/data-api/src/app/auth/token.decorator.ts");
-let MeetupController = class MeetupController {
-    constructor(meetupService) {
-        this.meetupService = meetupService;
-    }
-    getInvites(token) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.meetupService.getInvites(token.id);
-        });
-    }
-    getMeetups(token) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.meetupService.getAll(token.id);
-        });
-    }
-    getMeetup(token, id) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.meetupService.getOne(token.id, id);
-        });
-    }
-    create(token, meetup) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                return yield this.meetupService.create(meetup.topic, meetup.datetime, meetup.tutorId, token.id);
-            }
-            catch (e) {
-                throw new common_1.HttpException('invalid meetup', common_1.HttpStatus.BAD_REQUEST);
-            }
-        });
-    }
-    acceptInvite(token, id) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.meetupService.acceptInvite(token.id, id);
-            }
-            catch (e) {
-                throw new common_1.HttpException('invalid invite accept', common_1.HttpStatus.BAD_REQUEST);
-            }
-        });
-    }
-    postReview(token, id, review) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.meetupService.postReview(token.id, id, review.text, review.rating);
-            }
-            catch (e) {
-                throw new common_1.HttpException('invalid review', common_1.HttpStatus.BAD_REQUEST);
-            }
-        });
-    }
-};
-tslib_1.__decorate([
-    (0, common_1.Get)('invite'),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _b : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
-], MeetupController.prototype, "getInvites", null);
-tslib_1.__decorate([
-    (0, common_1.Get)(),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _d : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
-], MeetupController.prototype, "getMeetups", null);
-tslib_1.__decorate([
-    (0, common_1.Get)(':id'),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__param(1, (0, common_1.Param)('id')),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _f : Object, String]),
-    tslib_1.__metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
-], MeetupController.prototype, "getMeetup", null);
-tslib_1.__decorate([
-    (0, common_1.Post)(),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__param(1, (0, common_1.Body)()),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_h = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _h : Object, typeof (_j = typeof data_1.MeetupCreation !== "undefined" && data_1.MeetupCreation) === "function" ? _j : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
-], MeetupController.prototype, "create", null);
-tslib_1.__decorate([
-    (0, common_1.Post)('/:id/accept'),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__param(1, (0, common_1.Param)('id')),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_l = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _l : Object, String]),
-    tslib_1.__metadata("design:returntype", Promise)
-], MeetupController.prototype, "acceptInvite", null);
-tslib_1.__decorate([
-    (0, common_1.Post)('/:id/review'),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__param(1, (0, common_1.Param)('id')),
-    tslib_1.__param(2, (0, common_1.Body)()),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_m = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _m : Object, String, typeof (_o = typeof data_1.Review !== "undefined" && data_1.Review) === "function" ? _o : Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], MeetupController.prototype, "postReview", null);
-MeetupController = tslib_1.__decorate([
-    (0, common_1.Controller)('meetup'),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof meetup_service_1.MeetupService !== "undefined" && meetup_service_1.MeetupService) === "function" ? _a : Object])
-], MeetupController);
-exports.MeetupController = MeetupController;
-
-
-/***/ }),
-
-/***/ "./apps/data-api/src/app/meetup/meetup.schema.ts":
+/***/ "./apps/data-api/src/app/product/product.controller.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MeetupSchema = exports.Meetup = void 0;
-const tslib_1 = __webpack_require__("tslib");
-const mongoose_1 = __webpack_require__("@nestjs/mongoose");
-const mongoose_2 = __webpack_require__("mongoose");
-const uuid_1 = __webpack_require__("uuid");
-const review_schema_1 = __webpack_require__("./apps/data-api/src/app/meetup/review.schema.ts");
-const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
-const data_1 = __webpack_require__("./libs/data/src/index.ts");
-let Meetup = class Meetup {
-};
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ default: uuid_1.v4 }),
-    tslib_1.__metadata("design:type", String)
-], Meetup.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ required: true }),
-    tslib_1.__metadata("design:type", String)
-], Meetup.prototype, "topic", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ required: true }),
-    tslib_1.__metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], Meetup.prototype, "datetime", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ type: review_schema_1.ReviewSchema }),
-    tslib_1.__metadata("design:type", typeof (_b = typeof review_schema_1.Review !== "undefined" && review_schema_1.Review) === "function" ? _b : Object)
-], Meetup.prototype, "review", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ default: false }),
-    tslib_1.__metadata("design:type", Boolean)
-], Meetup.prototype, "accepted", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        required: true,
-        type: mongoose_2.Schema.Types.ObjectId,
-        // cannot use User.name here, as it leads to a circular dependency
-        ref: 'User',
-    }),
-    tslib_1.__metadata("design:type", typeof (_c = typeof user_schema_1.User !== "undefined" && user_schema_1.User) === "function" ? _c : Object)
-], Meetup.prototype, "tutorRef", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ required: true, type: { id: String, name: String } }),
-    tslib_1.__metadata("design:type", typeof (_d = typeof data_1.UserIdentity !== "undefined" && data_1.UserIdentity) === "function" ? _d : Object)
-], Meetup.prototype, "tutor", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        required: true,
-        type: mongoose_2.Schema.Types.ObjectId,
-        // cannot use User.name here, as it leads to a circular dependency
-        ref: 'User',
-    }),
-    tslib_1.__metadata("design:type", typeof (_e = typeof user_schema_1.User !== "undefined" && user_schema_1.User) === "function" ? _e : Object)
-], Meetup.prototype, "pupilRef", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ required: true, type: { id: String, name: String } }),
-    tslib_1.__metadata("design:type", typeof (_f = typeof data_1.UserIdentity !== "undefined" && data_1.UserIdentity) === "function" ? _f : Object)
-], Meetup.prototype, "pupil", void 0);
-Meetup = tslib_1.__decorate([
-    (0, mongoose_1.Schema)()
-], Meetup);
-exports.Meetup = Meetup;
-exports.MeetupSchema = mongoose_1.SchemaFactory.createForClass(Meetup);
-
-
-/***/ }),
-
-/***/ "./apps/data-api/src/app/meetup/meetup.service.ts":
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MeetupService = void 0;
+exports.ProductController = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const common_1 = __webpack_require__("@nestjs/common");
-const mongoose_1 = __webpack_require__("mongoose");
-const mongoose_2 = __webpack_require__("@nestjs/mongoose");
-const meetup_schema_1 = __webpack_require__("./apps/data-api/src/app/meetup/meetup.schema.ts");
-const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
-const topic_service_1 = __webpack_require__("./apps/data-api/src/app/topic/topic.service.ts");
-let MeetupService = class MeetupService {
-    constructor(meetupModel, userModel, topicService) {
-        this.meetupModel = meetupModel;
-        this.userModel = userModel;
-        this.topicService = topicService;
-    }
-    getInvites(userId) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userModel.findOne({ id: userId });
-            if (user == null)
-                return [];
-            return this.meetupModel
-                .find({ tutorRef: user._id, accepted: false }, { _id: 0, __v: 0, tutorRef: 0, pupilRef: 0, 'tutor._id': 0, 'pupil._id': 0 });
-        });
-    }
-    create(topic, datetime, tutorUserId, pupilUserId) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            // await this.topicService.ensureExists(topic);
-            const tutor = yield this.userModel.findOne({ id: tutorUserId });
-            const pupil = yield this.userModel.findOne({ id: pupilUserId });
-            if (!tutor || !pupil) {
-                throw new Error('user not found');
-            }
-            if (!tutor.tutorTopics.find(t => t == topic) || !pupil.pupilTopics.find(t => t == topic)) {
-                throw new Error('invalid meetup');
-            }
-            const meetup = new this.meetupModel({
-                datetime,
-                topic,
-                tutorRef: tutor._id,
-                pupilRef: pupil._id,
-                tutor: { id: tutor.id, name: tutor.name },
-                pupil: { id: pupil.id, name: pupil.name },
-            });
-            tutor.meetups.push(meetup);
-            pupil.meetups.push(meetup);
-            yield Promise.all([meetup.save(), tutor.save(), pupil.save()]);
-            return { id: meetup.id };
-        });
-    }
-    getAll(userId) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userModel.findOne({ id: userId });
-            if (user == null)
-                return [];
-            return this.meetupModel
-                .find({ $or: [{ tutorRef: user._id, accepted: true }, { pupilRef: user._id }] }, { _id: 0, __v: 0, "review._id": 0, "review.__v": 0, tutorRef: 0, pupilRef: 0, 'tutor._id': 0, 'pupil._id': 0 });
-            // .populate('tutorRef', {id: 1, name: 1, _id: 0})
-            // .populate('pupilRef', {id: 1, name: 1, _id: 0});
-        });
-    }
-    getOne(userId, meetupId) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userModel.findOne({ id: userId });
-            if (user == null)
-                return null;
-            return this.meetupModel
-                .findOne({ $and: [{ id: meetupId }, { $or: [{ tutorRef: user._id }, { pupilRef: user._id }] }] }, { _id: 0, __v: 0, "review._id": 0, "review.__v": 0, tutorRef: 0, pupilRef: 0, 'tutor._id': 0, 'pupil._id': 0 });
-        });
-    }
-    acceptInvite(userId, meetupId) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userModel.findOne({ id: userId });
-            const result = yield this.meetupModel.updateOne({ id: meetupId, tutorRef: user._id }, { accepted: true });
-            if (result.modifiedCount == 0) {
-                throw new Error('not accepted');
-            }
-        });
-    }
-    postReview(userId, meetupId, text, rating) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const meetup = yield this.meetupModel.findOne({ id: meetupId }).populate('pupilRef');
-            if (meetup.pupilRef.id != userId)
-                throw new Error('user not authorized');
-            if (meetup.review)
-                throw new Error('already reviewed');
-            meetup.review = { text, rating };
-            yield meetup.save();
-        });
-    }
-};
-MeetupService = tslib_1.__decorate([
-    (0, common_1.Injectable)(),
-    tslib_1.__param(0, (0, mongoose_2.InjectModel)(meetup_schema_1.Meetup.name)),
-    tslib_1.__param(1, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object, typeof (_c = typeof topic_service_1.TopicService !== "undefined" && topic_service_1.TopicService) === "function" ? _c : Object])
-], MeetupService);
-exports.MeetupService = MeetupService;
-
-
-/***/ }),
-
-/***/ "./apps/data-api/src/app/meetup/review.schema.ts":
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReviewSchema = exports.Review = void 0;
-const tslib_1 = __webpack_require__("tslib");
-const mongoose_1 = __webpack_require__("@nestjs/mongoose");
-let Review = class Review {
-};
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ required: false }),
-    tslib_1.__metadata("design:type", String)
-], Review.prototype, "text", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        required: true,
-        validate: {
-            validator: (v) => Number.isInteger(v) && 1 <= v && v <= 5,
-            message: 'rating should be 1, 2, 3, 4 or 5',
-        }
-    }),
-    tslib_1.__metadata("design:type", Number)
-], Review.prototype, "rating", void 0);
-Review = tslib_1.__decorate([
-    (0, mongoose_1.Schema)()
-], Review);
-exports.Review = Review;
-exports.ReviewSchema = mongoose_1.SchemaFactory.createForClass(Review);
-
-
-/***/ }),
-
-/***/ "./apps/data-api/src/app/topic/topic.controller.ts":
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var _a, _b, _c, _d, _e, _f;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TopicController = void 0;
-const tslib_1 = __webpack_require__("tslib");
-const common_1 = __webpack_require__("@nestjs/common");
-const topic_service_1 = __webpack_require__("./apps/data-api/src/app/topic/topic.service.ts");
 const data_1 = __webpack_require__("./libs/data/src/index.ts");
 const token_decorator_1 = __webpack_require__("./apps/data-api/src/app/auth/token.decorator.ts");
-let TopicController = class TopicController {
-    constructor(topicService) {
-        this.topicService = topicService;
+const product_service_1 = __webpack_require__("./apps/data-api/src/app/product/product.service.ts");
+let ProductController = class ProductController {
+    constructor(productService) {
+        this.productService = productService;
     }
     getAll() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.topicService.getAll();
+            return this.productService.getAll();
         });
     }
-    addTopic(token, topicUpdate) {
+    getOne(id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.topicService.addTopic(token.id, topicUpdate.title, topicUpdate.role);
+            return this.productService.getOne(id);
         });
     }
-    removeTopic(token, topicUpdate) {
+    create(token, product) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.topicService.removeTopic(token.id, topicUpdate.title, topicUpdate.role);
+            try {
+                return yield this.productService.create(product, token.id);
+            }
+            catch (e) {
+                console.log('error', e);
+                throw new common_1.HttpException('Error creating product >' + e, 500);
+            }
         });
     }
 };
@@ -772,121 +448,214 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", []),
     tslib_1.__metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
-], TopicController.prototype, "getAll", null);
+], ProductController.prototype, "getAll", null);
+tslib_1.__decorate([
+    (0, common_1.Get)(':id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], ProductController.prototype, "getOne", null);
 tslib_1.__decorate([
     (0, common_1.Post)(),
     tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
     tslib_1.__param(1, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _c : Object, typeof (_d = typeof data_1.TopicUpdate !== "undefined" && data_1.TopicUpdate) === "function" ? _d : Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], TopicController.prototype, "addTopic", null);
-tslib_1.__decorate([
-    (0, common_1.Delete)(),
-    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__param(1, (0, common_1.Body)()),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _e : Object, typeof (_f = typeof data_1.TopicUpdate !== "undefined" && data_1.TopicUpdate) === "function" ? _f : Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], TopicController.prototype, "removeTopic", null);
-TopicController = tslib_1.__decorate([
-    (0, common_1.Controller)('topic'),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof topic_service_1.TopicService !== "undefined" && topic_service_1.TopicService) === "function" ? _a : Object])
-], TopicController);
-exports.TopicController = TopicController;
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _d : Object, typeof (_e = typeof data_1.Product !== "undefined" && data_1.Product) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], ProductController.prototype, "create", null);
+ProductController = tslib_1.__decorate([
+    (0, common_1.Controller)('product'),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof product_service_1.ProductService !== "undefined" && product_service_1.ProductService) === "function" ? _a : Object])
+], ProductController);
+exports.ProductController = ProductController;
 
 
 /***/ }),
 
-/***/ "./apps/data-api/src/app/topic/topic.schema.ts":
+/***/ "./apps/data-api/src/app/product/product.schema.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TopicSchema = exports.Topic = void 0;
+exports.ProductSchema = exports.Product = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const mongoose_1 = __webpack_require__("@nestjs/mongoose");
 const uuid_1 = __webpack_require__("uuid");
-let Topic = class Topic {
+let Product = class Product {
 };
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: uuid_1.v4, index: true }),
     tslib_1.__metadata("design:type", String)
-], Topic.prototype, "id", void 0);
+], Product.prototype, "id", void 0);
 tslib_1.__decorate([
-    (0, mongoose_1.Prop)({ required: true, unique: true }),
+    (0, mongoose_1.Prop)({
+        required: true,
+        unique: false,
+    }),
     tslib_1.__metadata("design:type", String)
-], Topic.prototype, "title", void 0);
-Topic = tslib_1.__decorate([
+], Product.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Product.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+        validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
+    }),
+    tslib_1.__metadata("design:type", Number)
+], Product.prototype, "rating", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+    }),
+    tslib_1.__metadata("design:type", Number)
+], Product.prototype, "price", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+    }),
+    tslib_1.__metadata("design:type", Number)
+], Product.prototype, "quantity", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Product.prototype, "author", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Product.prototype, "image", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({ default: [] }),
+    tslib_1.__metadata("design:type", Array)
+], Product.prototype, "reviews", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        default: [],
+        required: true,
+    }),
+    tslib_1.__metadata("design:type", Array)
+], Product.prototype, "category", void 0);
+Product = tslib_1.__decorate([
     (0, mongoose_1.Schema)()
-], Topic);
-exports.Topic = Topic;
-exports.TopicSchema = mongoose_1.SchemaFactory.createForClass(Topic);
+], Product);
+exports.Product = Product;
+exports.ProductSchema = mongoose_1.SchemaFactory.createForClass(Product);
 
 
 /***/ }),
 
-/***/ "./apps/data-api/src/app/topic/topic.service.ts":
+/***/ "./apps/data-api/src/app/product/product.service.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TopicService = void 0;
+exports.ProductService = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const common_1 = __webpack_require__("@nestjs/common");
 const mongoose_1 = __webpack_require__("mongoose");
 const mongoose_2 = __webpack_require__("@nestjs/mongoose");
-const topic_schema_1 = __webpack_require__("./apps/data-api/src/app/topic/topic.schema.ts");
+const product_schema_1 = __webpack_require__("./apps/data-api/src/app/product/product.schema.ts");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
-let TopicService = class TopicService {
-    constructor(topicModel, userModel) {
-        this.topicModel = topicModel;
+let ProductService = class ProductService {
+    constructor(productModel, userModel) {
+        this.productModel = productModel;
         this.userModel = userModel;
-    }
-    ensureExists(topic) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.topicModel.create({ title: topic });
-                // eslint-disable-next-line no-empty
-            }
-            catch (e) { }
-        });
     }
     getAll() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.topicModel.find({}, { _id: 0, __v: 0 });
+            return this.productModel.aggregate([
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'products',
+                        foreignField: 'id',
+                        as: 'products',
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        author: { $first: '$author' },
+                        name: { $first: '$name' },
+                        description: { $first: '$description' },
+                        image: { $first: '$image' },
+                        rating: { $first: '$rating' },
+                        quantity: { $first: '$quantity' },
+                        price: { $first: '$price' },
+                        reviews: { $first: '$reviews' },
+                        category: { $first: '$category' },
+                    }
+                }
+            ]);
         });
     }
-    addTopic(userId, topic, role) {
+    getOne(productId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.ensureExists(topic);
-            if (role == 'tutor') {
-                yield this.userModel.updateOne({ id: userId }, { $addToSet: { tutorTopics: topic } });
-            }
-            else {
-                yield this.userModel.updateOne({ id: userId }, { $addToSet: { pupilTopics: topic } });
-            }
+            const products = yield this.productModel.aggregate([
+                {
+                    $match: {
+                        id: productId,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        author: { $first: '$author' },
+                        name: { $first: '$name' },
+                        description: { $first: '$description' },
+                        image: { $first: '$image' },
+                        rating: { $first: '$rating' },
+                        quantity: { $first: '$quantity' },
+                        price: { $first: '$price' },
+                        reviews: { $first: '$reviews' },
+                        category: { $first: '$category' },
+                    }
+                }
+            ]);
+            return products[0];
         });
     }
-    removeTopic(userId, topic, role) {
+    create(product, authorId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (role == 'tutor') {
-                yield this.userModel.updateOne({ id: userId }, { $pull: { tutorTopics: topic } });
+            const author = yield this.userModel.findOne({ id: authorId });
+            if (!author) {
+                throw new Error('AuthorId not found');
             }
-            else {
-                yield this.userModel.updateOne({ id: userId }, { $pull: { pupilTopics: topic } });
-            }
+            const newProduct = new this.productModel({
+                author: author.id,
+                name: product.name,
+                description: product.description,
+                image: product.image,
+                rating: product.rating,
+                quantity: product.quantity,
+                price: product.price,
+                reviews: product.reviews,
+                category: product.category
+            });
+            author.products.push(newProduct);
+            yield Promise.all([newProduct.save(), author.save()]);
+            return newProduct;
         });
     }
 };
-TopicService = tslib_1.__decorate([
+ProductService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
-    tslib_1.__param(0, (0, mongoose_2.InjectModel)(topic_schema_1.Topic.name)),
+    tslib_1.__param(0, (0, mongoose_2.InjectModel)(product_schema_1.Product.name)),
     tslib_1.__param(1, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object])
-], TopicService);
-exports.TopicService = TopicService;
+], ProductService);
+exports.ProductService = ProductService;
 
 
 /***/ }),
@@ -914,8 +683,8 @@ let UserController = class UserController {
     // this method should precede the general getOne method, otherwise it never matches
     getSelf(token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const result = yield this.userService.getOne(token.id);
-            return result;
+            console.log('token CurrentLogger:', token);
+            return yield this.userService.getOne(token.id);
         });
     }
     getOne(id) {
@@ -961,9 +730,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserSchema = exports.User = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const mongoose_1 = __webpack_require__("@nestjs/mongoose");
-const mongoose_2 = __webpack_require__("mongoose");
 const uuid_1 = __webpack_require__("uuid");
-const isEmail_1 = tslib_1.__importDefault(__webpack_require__("validator/lib/isEmail"));
 let User = class User {
 };
 tslib_1.__decorate([
@@ -976,48 +743,26 @@ tslib_1.__decorate([
         unique: true,
     }),
     tslib_1.__metadata("design:type", String)
-], User.prototype, "name", void 0);
+], User.prototype, "username", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
-        required: true,
-        default: [],
+        default: 500,
+        unique: false,
     }),
-    tslib_1.__metadata("design:type", Array)
-], User.prototype, "roles", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        required: true,
-        default: true,
-    }),
-    tslib_1.__metadata("design:type", Boolean)
-], User.prototype, "isActive", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        required: true,
-        validate: {
-            validator: isEmail_1.default,
-            message: 'should be a valid email address',
-        }
-    }),
-    tslib_1.__metadata("design:type", String)
-], User.prototype, "emailAddress", void 0);
+    tslib_1.__metadata("design:type", Number)
+], User.prototype, "wallet", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: [] }),
     tslib_1.__metadata("design:type", Array)
-], User.prototype, "tutorTopics", void 0);
+], User.prototype, "friends", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: [] }),
     tslib_1.__metadata("design:type", Array)
-], User.prototype, "pupilTopics", void 0);
+], User.prototype, "products", void 0);
 tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
-        default: [],
-        type: [mongoose_2.Schema.Types.ObjectId],
-        // cannot use Meetup.name here, as it leads to a circular dependency
-        ref: 'Meetup',
-    }),
+    (0, mongoose_1.Prop)({ default: [] }),
     tslib_1.__metadata("design:type", Array)
-], User.prototype, "meetups", void 0);
+], User.prototype, "reviews", void 0);
 User = tslib_1.__decorate([
     (0, mongoose_1.Schema)()
 ], User);
@@ -1031,7 +776,7 @@ exports.UserSchema = mongoose_1.SchemaFactory.createForClass(User);
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserService = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -1039,94 +784,51 @@ const common_1 = __webpack_require__("@nestjs/common");
 const mongoose_1 = __webpack_require__("mongoose");
 const mongoose_2 = __webpack_require__("@nestjs/mongoose");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
-const meetup_schema_1 = __webpack_require__("./apps/data-api/src/app/meetup/meetup.schema.ts");
 let UserService = class UserService {
-    constructor(userModel, meetupModel) {
+    constructor(userModel) {
         this.userModel = userModel;
-        this.meetupModel = meetupModel;
     }
     getAll() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.userModel.aggregate([
-                { $lookup: {
+            return this.userModel.aggregate([{
+                    $lookup: {
                         from: 'meetups',
                         localField: 'meetups',
                         foreignField: '_id',
                         as: 'meetups',
-                    } },
-                { $addFields: {
-                        reviews: { $let: {
-                                vars: { user: '$_id' },
-                                in: { $map: {
-                                        input: { $filter: {
-                                                input: '$meetups',
-                                                as: 'meetup',
-                                                cond: { $and: [{ $eq: ['$$meetup.tutorRef', '$$user'] }, { $gt: ['$$meetup.review', null] }] }
-                                            } },
-                                        as: 'meetup',
-                                        in: {
-                                            rating: '$$meetup.review.rating',
-                                        },
-                                    } },
-                            } },
-                    } },
-                { $addFields: {
-                        rating: { $avg: '$reviews.rating' },
-                    } },
-                { $project: {
-                        _id: 0,
-                        __v: 0,
-                        meetups: 0,
-                        reviews: 0,
-                    } },
-            ]);
+                    }
+                },
+                { $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        wallet: { $first: '$wallet' },
+                        products: { $push: '$products' },
+                        reviews: { $push: '$reviews' },
+                        friends: { $push: '$friends' }
+                    },
+                }]);
         });
     }
     getOne(userId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userModel.aggregate([
-                { $match: {
+            console.log('model', this.userModel);
+            const users = yield this.userModel.aggregate([{
+                    $match: {
                         id: userId,
-                    } },
-                { $lookup: {
-                        from: 'meetups',
-                        localField: 'meetups',
-                        foreignField: '_id',
-                        as: 'meetups',
-                    } },
-                { $addFields: {
-                        reviews: { $let: {
-                                vars: { user: '$_id' },
-                                in: { $map: {
-                                        input: { $filter: {
-                                                input: '$meetups',
-                                                as: 'meetup',
-                                                cond: { $and: [{ $eq: ['$$meetup.tutorRef', '$$user'] }, { $gt: ['$$meetup.review', null] }] }
-                                            } },
-                                        as: 'meetup',
-                                        in: {
-                                            rating: '$$meetup.review.rating',
-                                            id: '$$meetup.id',
-                                            topic: '$$meetup.topic',
-                                            datetime: '$$meetup.datetime',
-                                            text: '$$meetup.review.text',
-                                            tutor: '$$meetup.tutor',
-                                            pupil: '$$meetup.pupil',
-                                        },
-                                    } },
-                            } },
-                    } },
-                { $addFields: {
-                        rating: { $avg: '$reviews.rating' },
-                    } },
-                { $project: {
-                        _id: 0,
-                        __v: 0,
-                        meetups: 0,
-                        'reviews.tutor._id': 0,
-                        'reviews.pupil._id': 0,
-                    } },
-            ]);
+                    }
+                },
+                { $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        wallet: { $first: '$wallet' },
+                        products: { $push: '$products' },
+                        reviews: { $push: '$reviews' },
+                        friends: { $push: '$friends' },
+                    }
+                }]);
+            console.log('users', users);
             return users[0];
         });
     }
@@ -1134,8 +836,7 @@ let UserService = class UserService {
 UserService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
-    tslib_1.__param(1, (0, mongoose_2.InjectModel)(meetup_schema_1.Meetup.name)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object])
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object])
 ], UserService);
 exports.UserService = UserService;
 
@@ -1149,10 +850,9 @@ exports.UserService = UserService;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__("tslib");
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/id.type.ts"), exports);
-tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/roles.ts"), exports);
-tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/meetup.interface.ts"), exports);
+tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/category.ts"), exports);
+tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/product.ts"), exports);
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/review.interface.ts"), exports);
-tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/topic.interface.ts"), exports);
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/user.interface.ts"), exports);
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/api-response.interface.ts"), exports);
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/auth.interface.ts"), exports);
@@ -1178,6 +878,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
+/***/ "./libs/data/src/lib/category.ts":
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
 /***/ "./libs/data/src/lib/id.type.ts":
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -1187,7 +896,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ "./libs/data/src/lib/meetup.interface.ts":
+/***/ "./libs/data/src/lib/product.ts":
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1197,24 +906,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /***/ }),
 
 /***/ "./libs/data/src/lib/review.interface.ts":
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-
-/***/ }),
-
-/***/ "./libs/data/src/lib/roles.ts":
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-
-/***/ }),
-
-/***/ "./libs/data/src/lib/topic.interface.ts":
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1293,13 +984,6 @@ module.exports = require("tslib");
 
 module.exports = require("uuid");
 
-/***/ }),
-
-/***/ "validator/lib/isEmail":
-/***/ ((module) => {
-
-module.exports = require("validator/lib/isEmail");
-
 /***/ })
 
 /******/ 	});
@@ -1347,6 +1031,7 @@ const app_module_1 = __webpack_require__("./apps/data-api/src/app/app.module.ts"
 function bootstrap() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const app = yield core_1.NestFactory.create(app_module_1.AppModule);
+        app.enableCors();
         // const globalPrefix = 'data-api';
         // app.setGlobalPrefix(globalPrefix);
         app.useGlobalInterceptors(new api_response_interceptor_1.ApiResponseInterceptor());

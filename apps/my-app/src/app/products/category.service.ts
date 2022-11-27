@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Category } from '@find-a-buddy/data';
 
 @Injectable({
   providedIn: 'root'

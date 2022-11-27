@@ -3,27 +3,30 @@
 
 
   <div class="login-content">
-    <form>
+
 
       <h2 class="text-center">Login</h2>
       <label class="inp col-12" for="inp">
-        <input placeholder="" id="inp" type="text">
-        <span class="label">Email</span>
+        <input id="inp" [(ngModel)]="username" type="text">
+        <span class="label">Username</span>
         <span class="focus-bg"></span>
       </label>
 
       <label class="inp col-12" for="inp">
-        <input placeholder="" id="inp" type="password">
+        <input id="inp" [(ngModel)]="password" type="password">
         <span class="label">Password</span>
         <span class="focus-bg"></span>
       </label>
 
-      <button>
+      <button (click)="login()">
         LOGIN
       </button>
 
-    </form>
+
   </div>
+</div>
+
+<div>
 </div>
 
 

@@ -9,7 +9,9 @@ import { ConfigService } from '@find-a-buddy/util-ui';
 })
 export class UserService extends EntityService<UserInfo> {
   constructor(private config: ConfigService, http: HttpClient) {
-    super(http, config.getApiEndpoint(), 'user');
+    super(http,
+        'http://localhost:3333/data-api/',
+        'user');
     console.log('UserService ' + config.getApiEndpoint());
   }
 }

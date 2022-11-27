@@ -16,8 +16,9 @@ export class AuthService {
         @InjectModel(User.name) private userModel: Model<UserDocument>
     ) {}
 
-    async createUser(name: string, emailAddress: string): Promise<string> {
-        const user = new this.userModel({name, emailAddress});
+    async createUser(username: string): Promise<string> {
+        const user = new this.userModel({username});
+
         await user.save();
         return user.id;
       }
@@ -31,10 +32,12 @@ export class AuthService {
         })
     }
 
-    async registerUser(username: string, password: string, emailAddress: string) {
+    async registerUser(username: string, password: string) {
         const generatedHash = await hash(password, parseInt(process.env.SALT_ROUNDS, 10));
 
-        const identity = new this.identityModel({username, hash: generatedHash, emailAddress});
+        const identity = new this.identityModel({username, hash: generatedHash});
+
+        console.log('registerUser', identity);
 
         await identity.save();
     }

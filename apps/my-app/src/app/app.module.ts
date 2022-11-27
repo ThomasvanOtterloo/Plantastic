@@ -33,6 +33,9 @@ import { IncludeFriendsCheckboxComponent } from './products/filter/include-frien
 import {MAT_CHECKBOX_DEFAULT_OPTIONS, MatCheckboxDefaultOptions} from "@angular/material/checkbox";
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {HttpClientModule} from "@angular/common/http";
+import {AuthService} from "@find-a-buddy/auth-ui";
+import { ConfigModule , CustomConfig} from "@find-a-buddy/util-ui";
+
 
 
 const routes: Routes = [
@@ -92,6 +95,8 @@ const routes: Routes = [
     MatDialogModule,
     MatCheckboxModule,
     HttpClientModule,
+    ConfigModule,
+    CustomConfig,
     RouterModule.forRoot(routes),
   ],
   exports: [
@@ -100,6 +105,7 @@ const routes: Routes = [
 
   providers: [
     UserService,
+    AuthService,
     {provide: MatDialogRef, useValue: {}},
     {provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'check' } as MatCheckboxDefaultOptions},
 

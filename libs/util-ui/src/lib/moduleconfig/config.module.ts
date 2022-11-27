@@ -4,6 +4,13 @@ import { CommonModule } from '@angular/common'
 /**
  * Module config options
  */
+
+@NgModule({
+  declarations: [],
+  imports: [CommonModule],
+  providers: [],
+  exports: []
+})
 export class CustomConfig {
   apiEndpoint!: string
 }

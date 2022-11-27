@@ -37,7 +37,6 @@ describe('AuthController', () => {
       exampleUser = {
         username: 'henk',
         password: 'supersecret123',
-        emailAddress: 'henk@henk.nl',
       }
       exampleId = 'id123';
 
@@ -53,8 +52,8 @@ describe('AuthController', () => {
 
       const id = await authController.register(exampleUser);
 
-      expect(register).toHaveBeenCalledWith(exampleUser.username, exampleUser.password, exampleUser.emailAddress);
-      expect(create).toHaveBeenCalledWith(exampleUser.username, exampleUser.emailAddress);
+      expect(register).toHaveBeenCalledWith(exampleUser.username, exampleUser.password);
+      expect(create).toHaveBeenCalledWith(exampleUser.username);
       expect(id).toHaveProperty('id', exampleId);
     });
 

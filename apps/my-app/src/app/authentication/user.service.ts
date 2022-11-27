@@ -5,26 +5,22 @@ import {User} from "./component-user-model";
   providedIn: 'root'
 })
 
-
-
 export class UserService {
   users: User [] = [
     {
       id: 1,
-      email: 'John@gmail.com',
+      username: 'John',
       password: '123456',
       wallet: 100,
     },
     {
       id: 2,
-      email: 'kees@gmail.com',
+      username: 'kees',
       password: '123456',
       wallet: 100.55,
     }
 
   ];
-
-
 
   constructor() {
     console.log(  "component user model created");
@@ -45,4 +41,10 @@ export class UserService {
 
     console.log("user " +user+"created");
   }
+
+  read(){
+    return this.users;
+  }
+
+
 }

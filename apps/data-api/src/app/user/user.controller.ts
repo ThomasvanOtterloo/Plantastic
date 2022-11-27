@@ -1,9 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {Controller, Get, Param} from '@nestjs/common';
 
-import { UserService } from './user.service';
+import {UserService} from './user.service';
 
-import { UserInfo, User } from '@find-a-buddy/data';
-import { InjectToken, Token } from '../auth/token.decorator';
+import {User, UserInfo} from '@find-a-buddy/data';
+import {InjectToken, Token} from '../auth/token.decorator';
 
 @Controller('user')
 export class UserController {
@@ -17,8 +17,8 @@ export class UserController {
   // this method should precede the general getOne method, otherwise it never matches
   @Get('self')
   async getSelf(@InjectToken() token: Token): Promise<User> {
-    const result = await this.userService.getOne(token.id);
-    return result;
+    console.log('token CurrentLogger:', token);
+    return await this.userService.getOne(token.id);
   }
 
   @Get(':id')

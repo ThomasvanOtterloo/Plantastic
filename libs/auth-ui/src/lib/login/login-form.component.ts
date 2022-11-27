@@ -11,29 +11,29 @@ export class LoginFormComponent implements OnInit {
   @Output() formSubmitted = new EventEmitter<UserLogin>();
 
   ngOnInit(): void {
-    this.loginForm = new FormGroup({
-      // email: new FormControl(null, [Validators.required, Validators.email]),
-      name: new FormControl(null, [
-        Validators.required,
-        Validators.minLength(5),
-      ]),
-      password: new FormControl(null, [
-        Validators.required,
-        Validators.minLength(3),
-      ]),
-    });
+    // this.loginForm = new FormGroup({
+    //   // email: new FormControl(null, [Validators.required, Validators.email]),
+    //   name: new FormControl(null, [
+    //     Validators.required,
+    //     Validators.minLength(5),
+    //   ]),
+    //   password: new FormControl(null, [
+    //     Validators.required,
+    //     Validators.minLength(3),
+    //   ]),
+    // });
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      const loginFormData: UserLogin = {
-        // emailAdress: this.loginForm.value.email,
-        name: this.loginForm.value.name,
-        password: this.loginForm.value.password,
-      };
-      this.formSubmitted.emit(loginFormData);
-    } else {
-      console.error('loginForm invalid');
-    }
+    // if (this.loginForm.valid) {
+    //   const loginFormData: UserLogin = {
+    //     // emailAdress: this.loginForm.value.email,
+    //     name: this.loginForm.value.name,
+    //     password: this.loginForm.value.password,
+    //   };
+    //   this.formSubmitted.emit(loginFormData);
+    // } else {
+    //   console.error('loginForm invalid');
+    // }
   }
 }

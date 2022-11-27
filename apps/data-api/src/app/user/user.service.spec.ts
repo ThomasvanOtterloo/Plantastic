@@ -39,26 +39,27 @@ describe('UserService', () => {
 
   const testUsers = [{
     id: 'jan123',
-    name: 'jan',
-    emailAddress: 'mail@address.com',
-    tutorTopics: [],
-    pupilTopics: [],
-    meetups: [],
+    username: 'jan',
+    wallet: 500,
+    products: [],
+    reviews: [],
+    friends: [],
   }, {
-    id: 'dion123',
-    name: 'dion',
-    emailAddress: 'mail@address.com',
-    tutorTopics: [],
-    pupilTopics: [],
-    meetups: [],
-  }, {
-    id: 'davide123',
-    name: 'davide',
-    emailAddress: 'mail@address.com',
-    tutorTopics: [],
-    pupilTopics: [],
-    meetups: [],
-  }];
+    id: 'peter123',
+    username: 'peter',
+    wallet: 500,
+    products: [],
+    reviews: [],
+    friends: [],
+    }, {
+    id: 'maria123',
+    username: 'maria',
+    wallet: 500,
+    products: [],
+    reviews: [],
+    friends: [],
+  }
+  ];
   
   beforeAll(async () => {
     let uri: string;
@@ -73,22 +74,22 @@ describe('UserService', () => {
           },
         }),
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-        MongooseModule.forFeature([{ name: Meetup.name, schema: MeetupSchema }]),
+        // MongooseModule.forFeature([{ name: Meetup.name, schema: MeetupSchema }]),
       ],
       providers: [UserService],
     }).compile();
 
     service = app.get<UserService>(UserService);
     userModel = app.get<Model<UserDocument>>(getModelToken(User.name));
-    meetupModel = app.get<Model<MeetupDocument>>(getModelToken(Meetup.name));
+    // meetupModel = app.get<Model<MeetupDocument>>(getModelToken(Meetup.name));
 
     mongoc = new MongoClient(uri);
     await mongoc.connect();
   });
 
   beforeEach(async () => {
-    await mongoc.db('test').collection('users').deleteMany({});
-    await mongoc.db('test').collection('meetups').deleteMany({});
+    await mongoc.db('plantastic').collection('users').deleteMany({});
+    // await mongoc.db('plantastic').collection('meetups').deleteMany({});
 
     const user1 = new userModel(testUsers[0]);
     const user2 = new userModel(testUsers[1]);
@@ -147,8 +148,8 @@ describe('UserService', () => {
   
       expect(results).toHaveLength(3);
       expect(results.map(r => r.name)).toContain('jan');
-      expect(results.map(r => r.name)).toContain('dion');
-      expect(results.map(r => r.name)).toContain('davide');
+      expect(results.map(r => r.name)).toContain('peter');
+      expect(results.map(r => r.name)).toContain('maria');
     });
     
     it('should not give meetups or reviews', async () => {
@@ -162,17 +163,18 @@ describe('UserService', () => {
       const results = await service.getAll();
 
       expect(results[0]).toHaveProperty('id');
-      expect(results[0]).toHaveProperty('name');
-      expect(results[0]).toHaveProperty('rating');
-      expect(results[0]).toHaveProperty('tutorTopics');
-      expect(results[0]).toHaveProperty('pupilTopics');
-      expect(results.filter(u => u.name == 'jan')[0].rating).toBe(4.5);
+      expect(results[0]).toHaveProperty('username');
+      expect(results[0]).toHaveProperty('wallet');
+      expect(results[0]).toHaveProperty('products');
+      expect(results[0]).toHaveProperty('friends');
+      expect(results[0]).toHaveProperty('reviews');
+      expect(results.filter(u => u.name == 'jan')[0].).toBe(500);
     });
   });
 
   describe('getOne', () => {
     it('should retrieve a specific user', async () => {
-      const result = await service.getOne('jan123');
+      const result = await service.getOne('jan');
 
       expect(result).toHaveProperty('name', 'jan');
     });

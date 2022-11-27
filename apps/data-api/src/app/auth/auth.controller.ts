@@ -1,6 +1,6 @@
 import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
 
-import { ResourceId, Token, UserCredentials, UserRegistration } from '@find-a-buddy/data';
+import { ResourceId, Token, UserRegistration } from '@find-a-buddy/data';
 
 import { AuthService } from './auth.service';
 
@@ -10,21 +10,24 @@ export class AuthController {
 
     @Post('register')
     async register(@Body() credentials: UserRegistration): Promise<ResourceId> {
+        console.log('register', credentials);
         try {
-            await this.authService.registerUser(credentials.username, credentials.password, credentials.emailAddress);
-    
+            await this.authService.registerUser(credentials.username, credentials.password);
+            console.log('register succeeded');
             return {
-                id: await this.authService.createUser(credentials.username, credentials.emailAddress),
+                id: await this.authService.createUser(credentials.username),
             };
         } catch (e) {
-            throw new HttpException('Username invalid', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Username invalid' + e, HttpStatus.BAD_REQUEST);
         }
     }
 
     @Post('login')
-    async login(@Body() credentials: UserCredentials): Promise<Token> {
+    async login(@Body() credentials: UserRegistration): Promise<Token> {
+        console.log('login inside controller', credentials);
         try {
             return {
+
                 token: await this.authService.generateToken(credentials.username, credentials.password)
             };
         } catch (e) {

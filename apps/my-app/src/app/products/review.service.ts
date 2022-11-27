@@ -8,29 +8,33 @@ import {Review} from "./component-review-model";
 export class ReviewService {
   reviews: Review [] = [
       {
+        id: 1,
         productId: 1,
-        author: "John Doe",
+        authorId: "John Doe",
         description: "This is a review of the product.",
         dateCreated: new Date(),
         rating: 7,
       },
       {
+        id: 2,
         productId: 1,
-        author: "Marky Parky",
+        authorId: "Marky Parky",
         description: "This is a review of the product.",
         dateCreated: new Date(),
         rating: 7,
       },
       {
+        id: 3,
         productId: 2,
-        author: "Klaas Heuvels",
+        authorId: "Klaas Heuvels",
         description: "This is a review of the product.",
         dateCreated: new Date(),
         rating: 7,
       },
       {
+        id: 4,
         productId: 2,
-        author: "Jan weer",
+        authorId: "Jan weer",
         description: "This is a review of the product.",
         dateCreated: new Date(),
         rating: 7,
@@ -53,16 +57,24 @@ export class ReviewService {
   createReview(review: Review) {
     return new Promise((resolve) => {
       this.reviews.push(review);
+        resolve(true);
+
     });
   }
 
-  deleteReview(review: Review) {
-    let index = this.reviews.findIndex((Review) => Review.author === review.author);
+  deleteReview(id?: number) {
+    let index = this.reviews.findIndex((review) => review.id === id);
+    console.log(index);
     this.reviews.splice(index, 1);
+    console.log(this.reviews);
   }
 
   formatReviewDate(date: Date) {
     return date.toLocaleString('en-us',{month:'short', year:'numeric', day:'numeric'})
   }
 
+  saveReview(review: Review) {
+    let index = this.reviews.findIndex((r) => r.id === review.id);
+    this.reviews[index] = review;
+  }
 }

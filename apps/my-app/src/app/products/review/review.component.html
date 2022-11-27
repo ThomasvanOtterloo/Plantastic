@@ -5,29 +5,51 @@
 
 <div class="review">
   <div class="row">
-  <div *ngFor="let review of reviewsOfProduct" class="review-box col-6">
+    <div class="review-box">
 
+      <div class="row">
+        <div class="col-4">
+          <div>
+            <h3>Authors username:</h3>
+          </div>
+        </div>
+
+        <div class="col-6">
+            <ngb-rating class="rating" [(ngModel)]="newRating" [readonly]="false"></ngb-rating>
+        </div>
+
+        <label class="inp" for="name">
+          <input id="name" type="text" [(ngModel)]="description" minlength="1">
+          <span class="label">Description</span>
+          <span class="focus-bg"></span>
+        </label>
+
+        <div class="col-1 text-end">
+            <img
+                    class="icon"
+                    src="/assets/save-icon.png"
+                    (click)="CreateReview()"
+            >
+        </div>
+      </div>
+    </div>
+
+
+  <div *ngFor="let review of reviewsOfProduct" class="review-box col-12">
     <div class="row">
       <div class="col-4">
-
-        <div *ngIf="!editMode">
-          <h3>{{review.author}}</h3>
+        <div>
+          <h3>{{review.authorId}}</h3>
         </div>
-        <div *ngIf="editMode">
-          <label class="inp" for="inp">
-            <input placeholder="{{review.author}}" id="inp" type="text">
-          </label>
-        </div>
-
       </div>
 
-      <div class="col-4">
+      <div class="col-6">
         <div *ngIf="!editMode">
           <ngb-rating class="rating" [rate]="review.rating" [readonly]="true"></ngb-rating>
         </div>
 
         <div *ngIf="editMode">
-          <ngb-rating class="rating" [rate]="review.rating" [readonly]="false" style="color: grey"></ngb-rating>
+          <ngb-rating class="rating" [(ngModel)]="newRating" [readonly]="false" style="color: grey"></ngb-rating>
         </div>
       </div>
 
@@ -42,13 +64,17 @@
         </div>
 
         <div *ngIf="editMode">
-          <button class="btn btn-primary" type="button" (click)="editMode = false" >Save
-          </button>
+            <img
+                class="icon"
+                src="/assets/save-icon.png"
+
+                (click)="saveReview(review)"
+            >
         </div>
       </div>
 
-      <div class="col-1">
-        <img class="icon" (click)="DeleteReview()" src="/assets/delete-icon-removebg-preview.png">
+      <div class="col-1 text-end">
+        <img class="icon" (click)="DeleteReview(review?.id)" src="/assets/delete-icon-removebg-preview.png">
       </div>
     </div>
 
@@ -59,7 +85,11 @@
       </div>
 
       <div *ngIf="editMode">
-        <input placeholder="{{review.description}}" id="inp" type="text">
+        <label class="inp" for="name">
+          <input id="name" type="text" [(ngModel)]="review.description" minlength="1">
+          <span class="label">Description</span>
+          <span class="focus-bg"></span>
+        </label>
       </div>
     </div>
 

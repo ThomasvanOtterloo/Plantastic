@@ -8,21 +8,18 @@
                     <label class="inp col-12" for="inp">
                         <input type="text" id="inp" name="email"
                                class="inp col-12" required minlength="4" email="true"
-                               [(ngModel)]="user.email" #email="ngModel">
+                               [(ngModel)]="user.username" #username="ngModel">
 
                         <span class="label">Email</span>
                         <span class="focus-bg"></span>
                     </label>
-                    <div *ngIf="email.invalid && (email.dirty || email.touched)" class="alert">
+                    <div *ngIf="username.invalid && (username.dirty || username.touched)" class="alert">
 
-                        <div *ngIf="email.errors?.['required']">
-                            Email is required.
+                        <div *ngIf="username.errors?.['required']">
+                            username is required.
                         </div>
-                        <div *ngIf="email.errors?.['minlength']">
-                            Email must be at least 4 characters long.
-                        </div>
-                        <div *ngIf="email.errors?.['email']">
-                            Email must be a valid email.
+                        <div *ngIf="username.errors?.['minlength']">
+                            username must be at least 4 characters long.
                         </div>
                     </div>
                 </div>

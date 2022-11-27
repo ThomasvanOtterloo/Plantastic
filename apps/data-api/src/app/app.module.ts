@@ -34,3 +34,4 @@ export class AppModule {
     consumer.apply(TokenMiddleware).forRoutes('data-api');
   }
 }
+

@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { UserIdentity, UserInfo, UserLogin } from '@find-a-buddy/data';
+import {User, UserIdentity, UserInfo, UserLogin, UserRegistration} from '@find-a-buddy/data';
 import { Router } from '@angular/router';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { AlertService, ConfigService } from '@find-a-buddy/util-ui';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {InjectToken, Token} from "../../../../apps/data-api/src/app/auth/token.decorator";
+
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  readonly url = `http://localhost:3333/auth-api/`;
   public currentUser$ = new BehaviorSubject<UserInfo | undefined>(undefined);
   private readonly CURRENT_USER = 'currentuser';
   private readonly headers = new HttpHeaders({
@@ -47,24 +51,30 @@ export class AuthService {
       .subscribe(() => console.log('Startup auth done'));
   }
 
-  login(formData: UserLogin): Observable<UserIdentity | undefined> {
+
+
+  login(formData: UserRegistration): Observable<UserIdentity | undefined> {
     console.log(
-      `login at ${this.configService.getConfig().apiEndpoint}auth/login`
+      `login at ${this.url}auth-api/login`
     );
 
     return this.http
       .post<UserIdentity>(
-        `${this.configService.getConfig().apiEndpoint}auth/login`,
+        `${this.url}login`,
         formData,
         {
           headers: this.headers,
         }
       )
       .pipe(
-        map((data: any) => data.result),
+        map((data: any) => data.results),
         map((user: UserInfo) => {
+          console.log("userInfoforStorage" + user.id + user.username); // undefined. Why?
+          console.log("token: " + user.token);
           this.saveUserToLocalStorage(user);
-          this.currentUser$.next(user);
+
+          // this.currentUser$.next(user);
+          console.log('login - currentUser: ' + this.currentUser$.value);
           this.alertService.success('You have been logged in');
           return user;
         }),
@@ -78,14 +88,16 @@ export class AuthService {
       );
   }
 
-  register(userData: UserInfo): Observable<UserInfo | undefined> {
+
+
+  register(userData: UserRegistration): Observable<UserInfo | undefined> {
     console.log(
-      `register at ${this.configService.getConfig().apiEndpoint}user`
+      `register at ${this.url}user`
     );
     console.log(userData);
     return this.http
       .post<UserInfo>(
-        `${this.configService.getConfig().apiEndpoint}user`,
+        `${this.url}user`,
         userData,
         {
           headers: this.headers,
@@ -148,6 +160,18 @@ export class AuthService {
     );
   }
 
+  isLoggedIn(): Observable<boolean> {
+    const userData = localStorage.getItem(this.CURRENT_USER);
+    if (userData) {
+      const localUser = JSON.parse(userData);
+      console.log('isLoggedIn', localUser);
+      return of(true);
+    } else {
+      return of(false);
+    }
+
+  }
+
   getAuthorizationToken(): string | undefined {
     const userData = localStorage.getItem(this.CURRENT_USER);
     if (userData) {
@@ -158,4 +182,8 @@ export class AuthService {
     }
     return undefined;
   }
+
+
+
+
 }

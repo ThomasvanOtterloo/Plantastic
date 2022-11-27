@@ -2,8 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import isEmail from 'validator/lib/isEmail';
+import {Product, Review} from "@find-a-buddy/data";
 
-import { Meetup } from '../meetup/meetup.schema';
+// import { Meetup } from '../meetup/meetup.schema';
 
 export type UserDocument = User & Document;
 
@@ -16,44 +17,23 @@ export class User {
     required: true,
     unique: true,
   })
-  name: string;
+  username: string;
 
   @Prop({
-    required: true,
-    default: [],
+    default: 500,
+    unique: false,
   })
-  roles: string[];
-
-  @Prop({
-    required: true,
-    default: true,
-  })
-  isActive: boolean;
-
-  @Prop({
-    required: true,
-    validate: {
-      validator: isEmail,
-      message: 'should be a valid email address',
-    }
-  })
-  emailAddress: string;
-
-  // we don't use hooks to ensure the topics exist, as nestjs does not play nice
-  // https://github.com/nestjs/mongoose/issues/7
-  @Prop({default: []})
-  tutorTopics: string[];
+  wallet: number;
 
   @Prop({default: []})
-  pupilTopics: string[];
+  friends: User[];
 
-  @Prop({
-    default: [],
-    type: [MongooseSchema.Types.ObjectId],
-    // cannot use Meetup.name here, as it leads to a circular dependency
-    ref: 'Meetup',
-  })
-  meetups: Meetup[];
+  @Prop({default: []})
+  products: Product[];
+
+  @Prop({default: []})
+  reviews: Review[];
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

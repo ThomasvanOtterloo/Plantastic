@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 
 import { UserService } from './user.service';
+import {User} from "@find-a-buddy/data";
 
 describe('TopicController', () => {
   let app: TestingModule;
@@ -29,14 +30,11 @@ describe('TopicController', () => {
     it('should call getAll on the service', async () => {
       const exampleUser = {
         id: 'id123',
-        name: 'alexander',
-        isActive: true,
-        emailAddress: 'alexander@avans.nl',
-        roles: [],
-        meetups: [],
-        tutorTopics: ["nosql"],
-        pupilTopics: ["flying"],
-        rating: 4,
+        username: 'thomas0',
+        wallet: 500,
+        products: [],
+        reviews: [],
+        friends: [],
       };
 
       const getAll = jest.spyOn(userService, 'getAll')

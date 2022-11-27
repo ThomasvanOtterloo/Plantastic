@@ -4,11 +4,11 @@ import { Review } from './review.interface'
 export interface UserIdentity extends UserLogin{
     id: Id
     name: string
+    products: Id[]
 }
 
 export interface UserInfo extends UserIdentity {
     username: string | undefined
-    email: string
     token: string
 
 }
@@ -16,6 +16,8 @@ export interface UserInfo extends UserIdentity {
 export interface User extends UserInfo {
     reviews: Review[]
     wallet: number
+    friends: UserIdentity[]
+    products: Id[]
 }
 
 export interface UserLogin {
