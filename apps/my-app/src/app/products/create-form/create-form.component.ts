@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {Category, Product} from "../component-product-model";
+import {Category, Product} from "@find-a-buddy/data";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ProductService} from "../product.service";
+// import {ProductService} from "../product.service";
+import {ProductService} from "../product.api.service";
 import {FormControl} from "@angular/forms";
 
 @Component({
@@ -10,7 +11,14 @@ import {FormControl} from "@angular/forms";
   styleUrls: ['./create-form.component.css']
 })
 export class CreateFormComponent implements OnInit {
-  product: Product = { id: 0, name: '', description: '', quantity:0, price: 0, image: '', category: [], dateCreated: new Date() };
+  product: any = {
+    name: '',
+    description: '',
+    price: 0,
+    quantity:0,
+    image: '',
+    category: [],
+ };
 
   categories = new FormControl('');
   categoryList: string[] = [];
@@ -20,7 +28,7 @@ export class CreateFormComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private _productService: ProductService
+    private _productService: ProductService,
   ) {}
 
   ngOnInit(): void {
@@ -28,9 +36,9 @@ export class CreateFormComponent implements OnInit {
 
   create() {
     console.log(this.product);
-    this._productService.create(this.product).then(() => {
+    this._productService.createProduct(this.product).subscribe();
+
       this.router.navigate(['/sellers']);
-    });
   }
 
   sendData($event: any) {

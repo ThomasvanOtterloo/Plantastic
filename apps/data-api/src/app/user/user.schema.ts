@@ -3,6 +3,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import isEmail from 'validator/lib/isEmail';
 import {Product, Review} from "@find-a-buddy/data";
+import {Order} from "../order/order.schema";
 
 // import { Meetup } from '../meetup/meetup.schema';
 
@@ -33,6 +34,11 @@ export class User {
 
   @Prop({default: []})
   reviews: Review[];
+
+  @Prop({default: []})
+  orders: Order[];
+
+
 
 }
 

@@ -73,7 +73,8 @@ export class AuthService {
           console.log("token: " + user.token);
           this.saveUserToLocalStorage(user);
 
-          // this.currentUser$.next(user);
+          console.log(user);
+          this.currentUser$.next(user);
           console.log('login - currentUser: ' + this.currentUser$.value);
           this.alertService.success('You have been logged in');
           return user;

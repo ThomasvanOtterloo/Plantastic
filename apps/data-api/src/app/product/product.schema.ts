@@ -24,7 +24,8 @@ export class Product {
   description: string;
 
   @Prop({
-    required: true,
+    required: false,
+    default: 0,
     validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
   })
   rating: number;

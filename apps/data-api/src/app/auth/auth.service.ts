@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { Identity, IdentityDocument } from './identity.schema';
 import { User, UserDocument } from '../user/user.schema';
+import {UserInfo} from "@find-a-buddy/data";
 
 @Injectable()
 export class AuthService {
@@ -42,9 +43,10 @@ export class AuthService {
         await identity.save();
     }
 
-    async generateToken(username: string, password: string): Promise<string> {
+    async generateToken(username: string, password: string): Promise<UserInfo> {
         const identity = await this.identityModel.findOne({username});
 
+        console.log('generateToken', identity);
         if (!identity || !(await compare(password, identity.hash))) throw new Error("user not authorized");
 
         const user = await this.userModel.findOne({name: username});
@@ -52,8 +54,11 @@ export class AuthService {
         return new Promise((resolve, reject) => {
             sign({username, id: user.id}, process.env.JWT_SECRET, (err: Error, token: string) => {
                 if (err) reject(err);
-                else resolve(token);
+                else resolve({token: token, id: user.id, username: user.username, password: '', name: ''});
             });
         })
     }
 }
+/*
+* {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRob21hcyIsImlkIjoiYzY1MDYwYzUtNTE4NC00MzJiLWE1NWEtMGUwNjkyNmE1NDg2IiwiaWF0IjoxNjY5NzMwMjcyfQ.4HgW4vSfKvwDhsRAyf-QwioHfheEH9Ar9tD_b6WSAyc","id":"c65060c5-5184-432b-a55a-0e06926a5486","username":"thomas","password":"","name":""}
+* */

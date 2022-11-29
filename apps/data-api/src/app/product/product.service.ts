@@ -34,17 +34,13 @@ export class ProductService {
                 name: {$first: '$name'},
                 description: {$first: '$description'},
                 image: {$first: '$image'},
-                rating: {$first: '$rating'},
+                rating: {$avg: '$reviews.rating'},
                 quantity: {$first: '$quantity'},
                 price: {$first: '$price'},
                 reviews: {$first: '$reviews'},
                 category: {$first: '$category'},
             }
         }
-
-
-
-
 
     ]);
   }
@@ -88,13 +84,14 @@ export class ProductService {
         throw new Error('AuthorId not found');
     }
 
+    console.log('author works', author);
 
     const newProduct = new this.productModel({
-        author: author.id,
+        id: product.id,
+        author: author.username,
         name: product.name,
         description: product.description,
         image: product.image,
-        rating: product.rating,
         quantity: product.quantity,
         price: product.price,
         reviews: product.reviews,

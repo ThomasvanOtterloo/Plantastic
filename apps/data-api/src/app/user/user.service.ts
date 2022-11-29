@@ -48,12 +48,11 @@ export class UserService {
           products: {$push: '$products'},
           reviews: {$push: '$reviews'},
           friends: {$push: '$friends'},
+              orders: {$push: '$orders'},
         }
       }]);
-
-
-
     console.log('users', users);
     return users[0];
   }
+
 }
