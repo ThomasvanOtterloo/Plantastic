@@ -21,9 +21,15 @@ export class FriendController {
 
     }
 
-    @Delete()
-    async removeFriend(@InjectToken() token: Token, @Body('id') friend: Friend): Promise<Friend> {
-        return this.friendService.removeFriend(token.id, friend.id);
+    @Delete(':id')
+    async removeFriend(@InjectToken() token: Token, @Param('id') userId: string): Promise<Friend> {
+        try {
+            return this.friendService.removeFriend(token.id, userId);
+        }
+        catch (e) {
+            console.log('DIDNT WORK', e);
+            throw new HttpException('Error deleting friend >' + e, 500);
+        }
     }
 
 }

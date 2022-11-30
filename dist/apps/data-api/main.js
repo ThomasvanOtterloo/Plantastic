@@ -422,7 +422,7 @@ exports.DataModule = DataModule;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FriendController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -446,9 +446,15 @@ let FriendController = class FriendController {
             }
         });
     }
-    removeFriend(token, friend) {
+    removeFriend(token, userId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.friendService.removeFriend(token.id, friend.id);
+            try {
+                return this.friendService.removeFriend(token.id, userId);
+            }
+            catch (e) {
+                console.log('DIDNT WORK', e);
+                throw new common_1.HttpException('Error deleting friend >' + e, 500);
+            }
         });
     }
 };
@@ -461,12 +467,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], FriendController.prototype, "addFriends", null);
 tslib_1.__decorate([
-    (0, common_1.Delete)(),
+    (0, common_1.Delete)(':id'),
     tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
-    tslib_1.__param(1, (0, common_1.Body)('id')),
+    tslib_1.__param(1, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _e : Object, typeof (_f = typeof friend_schema_1.Friend !== "undefined" && friend_schema_1.Friend) === "function" ? _f : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _e : Object, String]),
+    tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], FriendController.prototype, "removeFriend", null);
 FriendController = tslib_1.__decorate([
     (0, common_1.Controller)('friend'),
@@ -528,30 +534,18 @@ let FriendService = class FriendService {
     }
     addFriend(userId, friendId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userModel.findOne({ id: userId });
-            const friend = yield this.userModel.findOne({ id: friendId });
-            console.log('current user: ', userId);
-            console.log('friend id: ', friendId);
-            if (!user) {
-                throw new Error('User not found');
-            }
-            if (!friend) {
-                throw new Error('Friend not found');
-            }
-            if (user.friends.includes(friend)) {
-                throw new Error('Friend already added');
-            }
-            const newFriend = new this.friendModel({
-                userId: friendId,
+            yield this.userModel.updateOne({ id: userId }, { $addToSet: { friends: { id: friendId } } });
+            return this.userModel.findOne({
+                id: userId,
             });
-            user.friends.push(friend);
-            yield Promise.all([user.save()]);
-            return newFriend;
         });
     }
     removeFriend(userId, friendId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return null;
+            yield this.userModel.updateOne({ id: userId }, { $pull: { friends: { id: friendId } } });
+            return this.userModel.findOne({
+                id: userId,
+            });
         });
     }
 };
@@ -902,6 +896,7 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
         required: false,
+        default: 'https://static.vecteezy.com/system/resources/previews/002/425/076/non_2x/plant-leaves-in-a-pot-beautiful-green-houseplant-isolated-simple-trendy-flat-style-for-interior-garden-decoration-design-free-vector.jpg'
     }),
     tslib_1.__metadata("design:type", String)
 ], Product.prototype, "image", void 0);

@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
-import {BehaviorSubject, Observable, of} from "rxjs";
+import {BehaviorSubject, catchError, map, Observable, of} from "rxjs";
 import {UserInfo} from "@find-a-buddy/data";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {switchMap} from "rxjs/operators";
 import {Product} from "@find-a-buddy/data";
 import {AlertService, ConfigService} from "@find-a-buddy/util-ui";
@@ -61,28 +61,29 @@ export class ProductService {
         const token = this.currentUser$.value?.token;
         console.log('token:>', token); //shows token.
 
-        return this.http.post<Product>(`${this.url}product`, product, {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json',
-                'Authorization': `${token}`,
-            })
-        });
+        return this.http.post<Product>(`product`, product, );
     }
 
-    getAllProducts(): Observable<Product[]> {
-        const token = this.currentUser$.value?.token;
-        console.log('token:>', token); //shows token.
-
-        return this.http.get<Product[]>(`${this.url}product`, {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json',
-                'Authorization': `${token}`,
-            })
-        });
+    getAllProducts(): Observable<Array<Product>> {
+        return this.http.get<ProductsBody>(`product`).pipe(
+            map((body: ProductsBody) => body.results),
+            catchError((error: HttpErrorResponse) => this.handleError(error))
+        );
     }
 
 
+    public handleError(error: HttpErrorResponse): Observable<any> {
+        if (error.status === 401) {
+            this.alertService.error('Unauthorized');
+            this.router.navigate(['/login']);
+        } else {
+            this.alertService.error('Something went wrong');
+        }
+        return of(undefined);
+    }
 
+}
 
-
+export interface ProductsBody {
+    results: Array<Product>
 }

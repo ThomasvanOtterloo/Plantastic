@@ -32,9 +32,10 @@ import { MatDialogModule} from '@angular/material/dialog';
 import { IncludeFriendsCheckboxComponent } from './products/filter/include-friends-checkbox/include-friends-checkbox.component';
 import {MAT_CHECKBOX_DEFAULT_OPTIONS, MatCheckboxDefaultOptions} from "@angular/material/checkbox";
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthService} from "@find-a-buddy/auth-ui";
 import { ConfigModule , CustomConfig} from "@find-a-buddy/util-ui";
+import {TokenInterceptor} from "../../token.interceptor";
 
 
 
@@ -104,10 +105,12 @@ const routes: Routes = [
   ],
 
   providers: [
+
     UserService,
     AuthService,
     {provide: MatDialogRef, useValue: {}},
     {provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'check' } as MatCheckboxDefaultOptions},
+    {provide: HTTP_INTERCEPTORS , useClass: TokenInterceptor, multi: true},
 
   ],
   bootstrap: [AppComponent]

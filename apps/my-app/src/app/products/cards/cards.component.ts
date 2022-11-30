@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import {UserService} from "../../authentication/user.service";
-import {ProductService} from "../product.service";
+
+// import {ProductService} from "../product.service";
+import {ProductService} from "../product.api.service";
 import {FormControl} from "@angular/forms";
 import {Category} from "../component-product-model";
 import {CategoryService} from "../category.service";
+import {Product} from "@find-a-buddy/data";
+import {map} from "rxjs";
 
 @Component({
   selector: 'app-cards',
@@ -22,7 +26,12 @@ export class CardsComponent implements OnInit {
   constructor(private _userService: UserService, private _productService: ProductService,private _categoryService: CategoryService) { }
   ngOnInit(): void {
     this.user = this._userService.getUsers();
-    this.products = this._productService.getProducts();
+    // this.products = this._productService.getProducts();
+    this.products = this._productService.getAllProducts().subscribe(
+        response => {
+          this.products = response;
+        }
+    )
     this.categoryList = this._categoryService.GetCategories();
   }
 
@@ -37,5 +46,4 @@ export class CardsComponent implements OnInit {
     this.selectedCategories = value;
     console.log(this.selectedCategories);
   }
-
 }
