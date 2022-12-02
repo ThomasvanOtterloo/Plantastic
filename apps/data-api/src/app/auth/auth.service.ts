@@ -19,7 +19,6 @@ export class AuthService {
 
     async createUser(username: string): Promise<string> {
         const user = new this.userModel({username});
-
         await user.save();
         return user.id;
       }
@@ -54,7 +53,7 @@ export class AuthService {
         return new Promise((resolve, reject) => {
             sign({username, id: user.id}, process.env.JWT_SECRET, (err: Error, token: string) => {
                 if (err) reject(err);
-                else resolve({token: token, id: user.id, username: user.username, password: '', name: ''});
+                else resolve({token: token, id: user.id, username: username, password: ''});
             });
         })
     }

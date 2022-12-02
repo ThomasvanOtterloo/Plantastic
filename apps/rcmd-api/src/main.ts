@@ -5,15 +5,26 @@
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  let neo4j = require('neo4j-driver');
+    const driver = neo4j.driver(
+        'bolt://localhost:7687',
+          neo4j.auth.basic('neo4j', 'password')
+    );
+    const session = driver.session();
+    const result = await session.run(
+        'MATCH (n) RETURN n LIMIT 25'
+    );
+    const singleRecord = result.records[0];
+    const node = singleRecord.get(0);
+    console.log(node.properties);
+    await session.close();
+    await driver.close();
+
   const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
   const port = process.env.PORT || 3334;
-  await app.listen(port);
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
   );

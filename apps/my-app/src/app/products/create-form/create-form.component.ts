@@ -1,14 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {Category, Product} from "@find-a-buddy/data";
 import {ActivatedRoute, Router} from "@angular/router";
-// import {ProductService} from "../product.service";
 import {ProductService} from "../product.api.service";
 import {FormControl} from "@angular/forms";
 
 @Component({
   selector: 'app-create-form',
   templateUrl: './create-form.component.html',
-  styleUrls: ['./create-form.component.css']
+  styleUrls: ['./create-form.component.css'],
 })
 export class CreateFormComponent implements OnInit {
   product: any = {
@@ -36,9 +35,12 @@ export class CreateFormComponent implements OnInit {
 
   create() {
     console.log(this.product);
-    this._productService.createProduct(this.product).subscribe();
-
-      this.router.navigate(['/sellers']);
+    this._productService.createProduct(this.product).subscribe(
+        (data) => {
+            console.log(data);
+            this.router.navigate(['/sellers']);
+        }
+    );
   }
 
   sendData($event: any) {

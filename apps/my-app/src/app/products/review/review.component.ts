@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from "@angular/router";
-import {ProductService} from "../product.service";
+import {ProductService} from "../product.api.service";
 import {ReviewService} from "../review.service";
-import {Product} from "../component-product-model";
-import {Review} from "../component-review-model";
+import {Product} from "@find-a-buddy/data";
+import {Review} from "@find-a-buddy/data";
 import {AuthService} from "@find-a-buddy/auth-ui";
 import {of, Subscription, switchMap, tap} from "rxjs";
 import {UserInfo} from "@find-a-buddy/data";
@@ -19,7 +19,7 @@ export class ReviewComponent implements OnInit {
   editMode = false;
   loggedinUser = 'Thomas';
   product: Product | undefined;
-  reviewsOfProduct: Review [] = [];
+  reviewsOfProduct2: Review [] = [];
   newRating: any;
   description: any;
 
@@ -37,62 +37,62 @@ export class ReviewComponent implements OnInit {
     private _productService: ProductService
   ) {}
 
-
-
+  @Input() reviewsOfProduct: any [] = [];
+  @Input() productId!: string;
+  @Output() onReviewChange = new EventEmitter<Product[]>();
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      this.product = this._productService.getProductById(params.get('id')!);
-    });
-    console.log(this.product);
-    this.GetReviews();
-
-
-
-
   }
 
 
-  GetReviews() {
-    this.reviewsOfProduct = this._reviewService.getReviewsByProductId(this.product!.id);
-  }
 
   CreateReview() {
-    console.log('Create Review');
-
-
-
-
-
-
-     let Review : Review = {
-      id: 11,
-       authorId: this.loggedinUser,
-      productId: this.product!.id,
+     let Review : any = {
       rating: this.newRating,
       description: this.description,
-
-       dateCreated: new Date(),
     }
-    console.log(Review);
-    this._reviewService.createReview(Review).then(r => {
-        this.GetReviews();
-    });
-
-
+    this._reviewService.createReview(Review, this.productId).subscribe(
+        (data) => {
+            console.log(data);
+            this.onChange();
+        })
   }
-  DeleteReview(id?: number) {
+
+    saveReview(review: Review) {
+      console.log('save review', review);
+        this.editMode = false;
+        review.rating = this.newRating;
+        this._reviewService.saveReview(review).subscribe(
+            (data) => {
+                console.log(data)
+                this.onChange();
+            }
+        );
+    }
+
+
+
+
+
+
+  DeleteReview(id?: string) {
     console.log('Delete Review');
-    this._reviewService.deleteReview(id);
-    this.GetReviews();
+    this._reviewService.deleteReview(id).subscribe(
+        (data) => {
+            console.log(data);
+            this.onChange();
+        }
+    );
   }
 
-  saveReview(review: Review) {
-    this.editMode = false;
-    review.rating = this.newRating;
-    // this._reviewService.saveReview(this.product!.id, this.loggedinUser, this.product!.rating, this.product!.review);
-    this._reviewService.saveReview(review);
+    private onChange() {
+        this._productService.getProductById(this.productId).subscribe(
+            response => {
+                this.onReviewChange.emit(response);
+                console.log('product after chagne of review', this.onReviewChange);
+            }
+        );
+    }
 
 
-  }
 }

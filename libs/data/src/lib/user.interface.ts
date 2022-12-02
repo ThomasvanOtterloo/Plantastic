@@ -3,12 +3,15 @@ import { Review } from './review.interface'
 
 
 export interface UserLogin {
-    name: string
     password: string
 }
 
 export interface UserIdentity extends UserLogin{
     id: Id
+}
+
+export interface friend extends UserInfo {
+
 }
 
 export interface UserInfo extends UserIdentity {

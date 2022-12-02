@@ -1,72 +1,43 @@
 import { Injectable } from '@angular/core';
 import {Product} from "./component-product-model";
-import {Review} from "./component-review-model";
+import {Review} from "@find-a-buddy/data";
+import {BehaviorSubject} from "rxjs";
+import {UserInfo} from "@find-a-buddy/data";
+import {AlertService, ConfigService} from "@find-a-buddy/util-ui";
+import {HttpClient} from "@angular/common/http";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReviewService {
-  reviews: Review [] = [
-      {
-        id: 1,
-        productId: 1,
-        authorId: "John Doe",
-        description: "This is a review of the product.",
-        dateCreated: new Date(),
-        rating: 7,
-      },
-      {
-        id: 2,
-        productId: 1,
-        authorId: "Marky Parky",
-        description: "This is a review of the product.",
-        dateCreated: new Date(),
-        rating: 7,
-      },
-      {
-        id: 3,
-        productId: 2,
-        authorId: "Klaas Heuvels",
-        description: "This is a review of the product.",
-        dateCreated: new Date(),
-        rating: 7,
-      },
-      {
-        id: 4,
-        productId: 2,
-        authorId: "Jan weer",
-        description: "This is a review of the product.",
-        dateCreated: new Date(),
-        rating: 7,
-      }
-    ];
+  public currentUser$ = new BehaviorSubject<UserInfo | undefined>(undefined);
 
-  constructor() { }
 
-  getReviewsByProductId(id: any) {
-    let reviewsOfProduct: Review [] = [];
-    this.reviews.forEach((review) => {
-      if (review.productId === id) {
-        review.dateCreated = this.formatReviewDate(review.dateCreated);
-        reviewsOfProduct.push(review);
-      }
-    });
-    return reviewsOfProduct;
+  constructor(
+      private configService: ConfigService,
+      private alertService: AlertService,
+      private http: HttpClient,
+      private router: Router
+  ) { }
+
+  // getReviewsByProductId(id: any) {
+  //   let reviewsOfProduct: Review [] = [];
+  //   this.reviews.forEach((review) => {
+  //     if (review.productId === id) {
+  //       review.dateCreated = this.formatReviewDate(review.dateCreated);
+  //       reviewsOfProduct.push(review);
+  //     }
+  //   });
+  //   return reviewsOfProduct;
+  // }
+
+  createReview(review: Review, productId: string) {
+    return this.http.post<Review>(`review/${productId}`, review);
   }
 
-  createReview(review: Review) {
-    return new Promise((resolve) => {
-      this.reviews.push(review);
-        resolve(true);
-
-    });
-  }
-
-  deleteReview(id?: number) {
-    let index = this.reviews.findIndex((review) => review.id === id);
-    console.log(index);
-    this.reviews.splice(index, 1);
-    console.log(this.reviews);
+  deleteReview(id?: string) {
+    return this.http.delete(`review/${id}`);
   }
 
   formatReviewDate(date: Date) {
@@ -74,7 +45,10 @@ export class ReviewService {
   }
 
   saveReview(review: Review) {
-    let index = this.reviews.findIndex((r) => r.id === review.id);
-    this.reviews[index] = review;
+    console.log('adasdasd',review);
+    console.log(review);
+    return this.http.patch<Review>(`review/${review.id}`, review);
+
+
   }
 }

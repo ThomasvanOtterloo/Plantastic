@@ -6,7 +6,7 @@ import { map, catchError, switchMap } from 'rxjs/operators';
 import { AlertService, ConfigService } from '@find-a-buddy/util-ui';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {InjectToken, Token} from "../../../../apps/data-api/src/app/auth/token.decorator";
-
+import {HttpBackend} from "@angular/common/http";
 
 
 @Injectable({
@@ -21,11 +21,13 @@ export class AuthService {
   });
 
   constructor(
+      private handler: HttpBackend,
     private configService: ConfigService,
     private alertService: AlertService,
     private http: HttpClient,
     private router: Router
   ) {
+    this.http = new HttpClient(handler);
     console.log(
       'AuthService constructor ' + configService.getConfig().apiEndpoint
     );
@@ -179,7 +181,7 @@ export class AuthService {
       const user: UserInfo = JSON.parse(userData);
 
       console.log('LET OP, TO DO!');
-      return user.name; // user.token;
+      return user.username; // user.token;
     }
     return undefined;
   }

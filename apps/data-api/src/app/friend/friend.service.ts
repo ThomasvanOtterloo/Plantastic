@@ -15,7 +15,8 @@ export class FriendService {
   ) {}
 
     async addFriend(userId: string, friendId: string): Promise<Friend | null> {
-        await this.userModel.updateOne({id: userId}, {$addToSet: {friends: {id: friendId}}});
+        const friend = await this.userModel.findOne({id: friendId});
+        await this.userModel.updateOne({id: userId}, {$addToSet: {friends: {friend}}});
         return this.userModel.findOne({
             id: userId,
         });

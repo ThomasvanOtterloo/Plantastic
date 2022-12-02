@@ -11,7 +11,6 @@ import {Router} from "@angular/router";
     providedIn: 'root'
 })
 export class ProductService {
-    readonly url = `http://localhost:3333/data-api/`;
     public currentUser$ = new BehaviorSubject<UserInfo | undefined>(undefined);
     private readonly CURRENT_USER = 'currentuser';
 
@@ -58,9 +57,6 @@ export class ProductService {
     }
 
     createProduct(product: Product): Observable<Product> {
-        const token = this.currentUser$.value?.token;
-        console.log('token:>', token); //shows token.
-
         return this.http.post<Product>(`product`, product, );
     }
 
@@ -69,6 +65,22 @@ export class ProductService {
             map((body: ProductsBody) => body.results),
             catchError((error: HttpErrorResponse) => this.handleError(error))
         );
+    }
+    getProductById(id: string): Observable<Array<Product>> {
+        const test = this.http.get<ProductsBody>(`product/${id}`).pipe(
+            map((body: ProductsBody) => body.results),
+            catchError((error: HttpErrorResponse) => this.handleError(error))
+        );
+        console.log('test', test);
+        return test
+    }
+
+    deleteProduct(id: string) {
+        return this.http.delete(`product/${id}`);
+    }
+
+    updateProduct(product: Product) {
+        return this.http.patch(`product/${product.id}`, product);
     }
 
 
@@ -82,8 +94,11 @@ export class ProductService {
         return of(undefined);
     }
 
+
+
 }
 
 export interface ProductsBody {
     results: Array<Product>
 }
+

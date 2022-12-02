@@ -250,7 +250,7 @@ let AuthService = class AuthService {
                     if (err)
                         reject(err);
                     else
-                        resolve({ token: token, id: user.id, username: user.username, password: '', name: '' });
+                        resolve({ token: token, id: user.id, username: username, password: '' });
                 });
             });
         });
@@ -534,7 +534,8 @@ let FriendService = class FriendService {
     }
     addFriend(userId, friendId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.userModel.updateOne({ id: userId }, { $addToSet: { friends: { id: friendId } } });
+            const friend = yield this.userModel.findOne({ id: friendId });
+            yield this.userModel.updateOne({ id: userId }, { $addToSet: { friends: { friend } } });
             return this.userModel.findOne({
                 id: userId,
             });
@@ -775,7 +776,7 @@ exports.OrderService = OrderService;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -799,6 +800,9 @@ let ProductController = class ProductController {
     }
     create(token, product) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (product.image === '') {
+                product.image = 'https://static.vecteezy.com/system/resources/previews/002/425/076/non_2x/plant-leaves-in-a-pot-beautiful-green-houseplant-isolated-simple-trendy-flat-style-for-interior-garden-decoration-design-free-vector.jpg';
+            }
             try {
                 return yield this.productService.create(product, token.id);
             }
@@ -806,6 +810,17 @@ let ProductController = class ProductController {
                 console.log('error', e);
                 throw new common_1.HttpException('Error creating product >' + e, 500);
             }
+        });
+    }
+    delete(id) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield this.productService.delete(id);
+            return null;
+        });
+    }
+    update(id, product) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.productService.update(id, product);
         });
     }
 };
@@ -830,6 +845,21 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _d : Object, typeof (_e = typeof data_1.Product !== "undefined" && data_1.Product) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ProductController.prototype, "create", null);
+tslib_1.__decorate([
+    (0, common_1.Delete)(':id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ProductController.prototype, "delete", null);
+tslib_1.__decorate([
+    (0, common_1.Patch)(':id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__param(1, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String, typeof (_h = typeof data_1.Product !== "undefined" && data_1.Product) === "function" ? _h : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], ProductController.prototype, "update", null);
 ProductController = tslib_1.__decorate([
     (0, common_1.Controller)('product'),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof product_service_1.ProductService !== "undefined" && product_service_1.ProductService) === "function" ? _a : Object])
@@ -967,6 +997,12 @@ let ProductService = class ProductService {
             ]);
         });
     }
+    delete(productId) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log('productId', productId);
+            yield this.productModel.deleteOne({ id: productId });
+        });
+    }
     getOne(productId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const products = yield this.productModel.aggregate([
@@ -1017,6 +1053,27 @@ let ProductService = class ProductService {
             return newProduct;
         });
     }
+    update(productId, product) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const updatedProduct = yield this.productModel.findOneAndUpdate({ id: productId }, Object.assign({}, product), { new: true });
+            const updatedAuthor = yield this.userModel.findOneAndUpdate({ username: updatedProduct.author }, {
+                $set: {
+                    'products.$[elem].name': updatedProduct.name,
+                    'products.$[elem].description': updatedProduct.description,
+                    'products.$[elem].image': updatedProduct.image,
+                    'products.$[elem].quantity': updatedProduct.quantity,
+                    'products.$[elem].price': updatedProduct.price,
+                    'products.$[elem].category': updatedProduct.category,
+                }
+            }, {
+                arrayFilters: [
+                    { 'elem.id': productId }
+                ],
+                new: true
+            });
+            return updatedProduct;
+        });
+    }
 };
 ProductService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
@@ -1033,7 +1090,7 @@ exports.ProductService = ProductService;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReviewController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -1059,12 +1116,23 @@ let ReviewController = class ReviewController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 console.log('productid:>>>', productId);
-                return yield this.reviewService.create(review, token.id, productId);
+                return yield this.reviewService.create(review, token, productId);
             }
             catch (e) {
                 console.log('error', e);
                 throw new common_1.HttpException('Error creating product >' + e, 500);
             }
+        });
+    }
+    delete(id) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.reviewService.delete(id);
+        });
+    }
+    update(id, review) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log('adasdasd', review);
+            return this.reviewService.update(id, review);
         });
     }
 };
@@ -1090,6 +1158,21 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _d : Object, String, typeof (_e = typeof data_1.Review !== "undefined" && data_1.Review) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ReviewController.prototype, "create", null);
+tslib_1.__decorate([
+    (0, common_1.Delete)(':id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ReviewController.prototype, "delete", null);
+tslib_1.__decorate([
+    (0, common_1.Patch)(':id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__param(1, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String, typeof (_h = typeof data_1.Review !== "undefined" && data_1.Review) === "function" ? _h : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], ReviewController.prototype, "update", null);
 ReviewController = tslib_1.__decorate([
     (0, common_1.Controller)('review'),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof review_service_1.ReviewService !== "undefined" && review_service_1.ReviewService) === "function" ? _a : Object])
@@ -1203,6 +1286,14 @@ let ReviewService = class ReviewService {
             ]);
         });
     }
+    delete(id) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log(id);
+            yield this.reviewModel.deleteOne({ id: id });
+            yield this.userModel.updateMany({}, { $pull: { reviews: { id: id } } });
+            yield this.productModel.updateMany({}, { $pull: { reviews: { id: id } } });
+        });
+    }
     getOne(productId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const products = yield this.reviewModel.aggregate([
@@ -1225,33 +1316,57 @@ let ReviewService = class ReviewService {
             return products[0];
         });
     }
-    create(review, authorId, productId) {
+    create(review, author, productId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            console.log(productId);
-            const product = yield this.productModel.findOne({ id: productId });
-            const author = yield this.userModel.findOne({ id: authorId });
-            if (!author) {
-                console.log(author);
-                throw new Error('authorId not found');
-            }
-            if (!product) {
-                console.log("product: " + product);
-                throw new Error('productId not found');
-            }
-            console.log("product: " + product);
-            console.log("author: " + author);
-            const newReview = new this.reviewModel({
-                productId: productId,
-                authorId: authorId,
-                author: author.username,
-                description: review.description,
-                rating: review.rating,
+            console.log(review);
+            review.authorId = author.id;
+            review.author = author.username;
+            review.productId = productId;
+            const newReview = new this.reviewModel(Object.assign({}, review));
+            const createdReview = yield this.userModel.findOneAndUpdate({ id: author.id }, { $push: { reviews: newReview } });
+            const createdReview2 = yield this.productModel.findOneAndUpdate({ id: productId }, { $push: { reviews: newReview } });
+            yield Promise.all([createdReview.save(), createdReview2.save(), newReview.save()]);
+            return this.reviewModel.findOne({ id: review.id });
+        });
+    }
+    update(id, review) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const updatedReview = yield this.reviewModel.findOneAndUpdate({
+                id: id,
+            }, Object.assign({}, review), {
+                new: true,
             });
-            console.log("newReview: " + newReview);
-            author.reviews.push(newReview);
-            product.reviews.push(newReview);
-            yield Promise.all([newReview.save(), author.save(), product.save()]);
-            return newReview;
+            const updatedReview2 = yield this.userModel.findOneAndUpdate({
+                id: review.authorId,
+            }, {
+                $set: {
+                    'reviews.$[elem].description': review.description,
+                    'reviews.$[elem].rating': review.rating,
+                }
+            }, {
+                arrayFilters: [{
+                        'elem.id': id,
+                    }],
+                new: true,
+            });
+            const updatedReview3 = yield this.productModel.findOneAndUpdate({
+                id: review.productId,
+            }, {
+                $set: {
+                    'reviews.$[elem].description': review.description,
+                    'reviews.$[elem].rating': review.rating,
+                }
+            }, {
+                arrayFilters: [{
+                        'elem.id': id,
+                    }],
+                new: true,
+            });
+            yield Promise.all([updatedReview.save(), updatedReview2.save(), updatedReview3.save()]);
+            if (!updatedReview) {
+                throw new common_1.NotFoundException(`Review with id ${id} not found`);
+            }
+            return updatedReview;
         });
     }
 };

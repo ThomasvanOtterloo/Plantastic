@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {Product} from "../component-product-model";
-import {ProductService} from "../product.service";
+import {Product} from "@find-a-buddy/data";
+import {ProductService} from "../product.api.service";
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {OrderDialogComponent} from "../order-dialog/order-dialog.component";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-details',
@@ -13,10 +14,10 @@ import {OrderDialogComponent} from "../order-dialog/order-dialog.component";
 
 export class DetailsComponent implements OnInit {
   componentId: string | null | undefined;
-  product: Product | undefined;
+  product: any;
 
   isFollowed: boolean = false;
-  follow:string = "Follow";
+  followState:string = "Follow";
 
   constructor(
     private route: ActivatedRoute,
@@ -31,7 +32,12 @@ export class DetailsComponent implements OnInit {
       if (this.componentId) {
         // Bestaande user
         console.log("Bestaande component");
-        this.product = this._productService.getProductById(this.componentId);
+        this.product = this._productService.getProductById(this.componentId).subscribe(
+            response => {
+                this.product = response;
+                console.log('this product',this.product);
+            }
+        );
       } else {
         // Nieuwe user
         console.log("Nieuwe component");
@@ -42,8 +48,12 @@ export class DetailsComponent implements OnInit {
   delete() {
     if (this.componentId) {
       console.log("Verwijderen van component met id: " + this.componentId);
-          this._productService.deleteProductById(this.componentId);
-          this.router.navigate(['/sellers']).then(r => console.log(r));
+          this._productService.deleteProduct(this.componentId).subscribe(
+                response => {
+                    console.log('response',response);
+                    this.router.navigate(['/sellers']).then(r => console.log(r));
+                }
+          );
         } else {
           console.log("Geen id");
         }
@@ -74,5 +84,12 @@ export class DetailsComponent implements OnInit {
 
     });
   }
+
+  onReviewChange($event: Product[]) {
+    console.log($event);
+    this.product = $event;
+
+  }
+
 
 }

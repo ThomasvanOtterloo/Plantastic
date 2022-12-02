@@ -45,6 +45,11 @@ export class ProductService {
     ]);
   }
 
+  async delete(productId: string) {
+      console.log('productId', productId);
+    await this.productModel.deleteOne({ id: productId });
+  }
+
 
 
   async getOne(productId: string): Promise<Product | null> {
@@ -67,14 +72,9 @@ export class ProductService {
                 price: {$first: '$price'},
                 reviews: {$first: '$reviews'},
                 category: {$first: '$category'},
-
-
-
             }
         }
-
     ]);
-
     return products[0];
   }
 
@@ -104,4 +104,38 @@ export class ProductService {
 
     return newProduct;
   }
+
+    async update(productId: string , product: Product): Promise<Product> {
+        const updatedProduct = await this.productModel.findOneAndUpdate(
+            { id: productId },
+            {
+                ...product,
+            },
+            { new: true }
+        );
+
+        const updatedAuthor = await this.userModel.findOneAndUpdate(
+            { username: updatedProduct.author },
+            {
+                $set: {
+                    'products.$[elem].name': updatedProduct.name,
+                    'products.$[elem].description': updatedProduct.description,
+                    'products.$[elem].image': updatedProduct.image,
+                    'products.$[elem].quantity': updatedProduct.quantity,
+                    'products.$[elem].price': updatedProduct.price,
+                    'products.$[elem].category': updatedProduct.category,
+                }
+            },
+            {
+                arrayFilters: [
+                    { 'elem.id': productId }
+                ],
+                new: true
+            });
+    return updatedProduct;
+    }
+
+
+
+
 }

@@ -12,11 +12,10 @@
 
       <div class="col-6">
         <div class="author">
-          <h3 > @Author name</h3>
+          <h3 > @{{product?.author}}</h3>
           <button class="btn btn-primary" *ngIf="isFollowed " (click)="isFollowed = false">Unfollow</button>
           <button class="btn btn-primary" *ngIf="!isFollowed" (click)="isFollowed = true">Follow</button>
         </div>
-
       </div>
     </div>
     <p>{{product?.description}}</p>
@@ -50,7 +49,12 @@
 
 
 <div class="reviews">
-  <app-review></app-review>
+  <app-review
+  (onReviewChange)="onReviewChange($event)"
+  [reviewsOfProduct]="product?.reviews"
+  [productId]="product?.id"
+
+  ></app-review>
 </div>
 
 
