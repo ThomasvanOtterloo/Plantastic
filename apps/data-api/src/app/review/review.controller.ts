@@ -26,6 +26,7 @@ export class ReviewController {
     @Post(':id')
     async create(@InjectToken() token: Token, @Param('id') productId: string ,  @Body() review: Review): Promise<Review> {
         try {
+
             console.log('productid:>>>' , productId)
             return await this.reviewService.create(review , token, productId);
         }
@@ -36,8 +37,8 @@ export class ReviewController {
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: string): Promise<void> {
-        return this.reviewService.delete(id);
+    async delete(@InjectToken() token: Token, @Param('id') id: string): Promise<void> {
+        return this.reviewService.delete(token , id);
     }
 
     @Patch(':id')

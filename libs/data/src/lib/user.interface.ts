@@ -22,6 +22,6 @@ export interface UserInfo extends UserIdentity {
 export interface User extends UserInfo {
     reviews: Review[]
     wallet: number
-    friends: UserIdentity[]
+    following: UserIdentity[]
     products: Id[]
 }

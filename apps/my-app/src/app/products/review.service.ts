@@ -21,18 +21,10 @@ export class ReviewService {
       private router: Router
   ) { }
 
-  // getReviewsByProductId(id: any) {
-  //   let reviewsOfProduct: Review [] = [];
-  //   this.reviews.forEach((review) => {
-  //     if (review.productId === id) {
-  //       review.dateCreated = this.formatReviewDate(review.dateCreated);
-  //       reviewsOfProduct.push(review);
-  //     }
-  //   });
-  //   return reviewsOfProduct;
-  // }
+
 
   createReview(review: Review, productId: string) {
+
     return this.http.post<Review>(`review/${productId}`, review);
   }
 

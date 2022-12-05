@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
-export type FriendDocument = Friend & Document;
+export type FollowDocument = Follow & Document;
 
 @Schema()
-export class Friend {
+export class Follow {
 
   @Prop({default: uuid, index: true})
   id: string;
@@ -16,8 +16,14 @@ export class Friend {
   })
   userId: string;
 
+  @Prop({
+    required: true,
+    unique: true,
+  })
+  username: string;
+
 
 
 }
 
-export const FriendSchema = SchemaFactory.createForClass(Friend);
+export const FollowSchema = SchemaFactory.createForClass(Follow);

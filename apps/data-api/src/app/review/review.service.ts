@@ -46,13 +46,18 @@ export class ReviewService {
     ]);
   }
 
-  async delete(id: string){
-      console.log(id)
-      await this.reviewModel.deleteOne({ id: id });
-      await this.userModel.updateMany({}, { $pull: { reviews: { id: id } } });
-      await this.productModel.updateMany({}, { $pull: { reviews: { id: id } } });
+  async delete(token: Token , id: string){
+
+
+      await Promise.all([
+          this.userModel.updateMany({username: token.username}, { $pull: { reviews: { id: id } } }),
+          this.productModel.updateMany({}, { $pull: { reviews: { id: id } } }),
+          this.reviewModel.deleteOne({id: id }),
+      ]);
 
   }
+
+
 
 
 
@@ -85,7 +90,6 @@ export class ReviewService {
         const newReview = new this.reviewModel({
             ...review,
         });
-
     const createdReview = await this.userModel.findOneAndUpdate({ id: author.id }, { $push: { reviews: newReview } });
     const createdReview2 = await this.productModel.findOneAndUpdate({ id: productId }, { $push: { reviews: newReview } });
 
@@ -138,5 +142,9 @@ export class ReviewService {
         }
 
         return updatedReview;
+    }
+
+    formatReviewDate(date: Date) {
+        return date.toLocaleString('en-us',{month:'short', year:'numeric', day:'numeric'})
     }
 }

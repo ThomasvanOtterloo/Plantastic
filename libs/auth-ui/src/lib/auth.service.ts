@@ -94,22 +94,15 @@ export class AuthService {
 
 
   register(userData: UserRegistration): Observable<UserInfo | undefined> {
-    console.log(
-      `register at ${this.url}user`
-    );
     console.log(userData);
     return this.http
       .post<UserInfo>(
-        `${this.url}user`,
-        userData,
-        {
-          headers: this.headers,
-        }
+        `http://localhost:3333/auth-api/register`,
+        userData
       )
       .pipe(
         map((user) => {
-          // this.saveUserToLocalStorage(user)
-          // this.currentUser$.next(user)
+
           this.alertService.success('You have been registered');
           return user;
         }),

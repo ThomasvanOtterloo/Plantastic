@@ -48,7 +48,7 @@ export class AuthService {
         console.log('generateToken', identity);
         if (!identity || !(await compare(password, identity.hash))) throw new Error("user not authorized");
 
-        const user = await this.userModel.findOne({name: username});
+        const user = await this.userModel.findOne({username: username});
 
         return new Promise((resolve, reject) => {
             sign({username, id: user.id}, process.env.JWT_SECRET, (err: Error, token: string) => {

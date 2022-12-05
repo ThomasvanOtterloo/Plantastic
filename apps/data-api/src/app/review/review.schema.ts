@@ -24,6 +24,12 @@ export class Review {
 
   @Prop({
     required: true,
+    default: Date.now
+  })
+  datetime: Date;
+
+  @Prop({
+    required: true,
     unique: false,
   })
   author: string;
@@ -40,6 +46,8 @@ export class Review {
     validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
   })
   rating: number;
+
+
 
 }
 

@@ -30,7 +30,7 @@ export class ProductController {
             product.image = 'https://static.vecteezy.com/system/resources/previews/002/425/076/non_2x/plant-leaves-in-a-pot-beautiful-green-houseplant-isolated-simple-trendy-flat-style-for-interior-garden-decoration-design-free-vector.jpg'
         }
         try {
-            return await this.productService.create(product, token.id);
+            return await this.productService.create(product, token);
         }
         catch (e) {
             console.log('error', e);

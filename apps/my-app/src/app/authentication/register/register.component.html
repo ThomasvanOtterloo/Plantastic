@@ -7,10 +7,10 @@
                 <div>
                     <label class="inp col-12" for="inp">
                         <input type="text" id="inp" name="email"
-                               class="inp col-12" required minlength="4" email="true"
+                               class="inp col-12" required minlength="4"
                                [(ngModel)]="user.username" #username="ngModel">
 
-                        <span class="label">Email</span>
+                        <span class="label">Username</span>
                         <span class="focus-bg"></span>
                     </label>
                     <div *ngIf="username.invalid && (username.dirty || username.touched)" class="alert">

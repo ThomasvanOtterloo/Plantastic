@@ -6,6 +6,7 @@ import {InjectModel} from '@nestjs/mongoose';
 import {Product as ProductModel, ProductDocument} from './product.schema';
 import {Category, Id, Product, Review} from '@find-a-buddy/data';
 import {User, UserDocument} from "../user/user.schema";
+import {Token} from "../auth/token.decorator";
 
 
 @Injectable()
@@ -34,20 +35,36 @@ export class ProductService {
                 name: {$first: '$name'},
                 description: {$first: '$description'},
                 image: {$first: '$image'},
-                rating: {$avg: '$reviews.rating'},
                 quantity: {$first: '$quantity'},
                 price: {$first: '$price'},
                 reviews: {$first: '$reviews'},
                 category: {$first: '$category'},
+            },
+        },
+        {
+            $addFields: {
+                rating: {
+                    rating: {$avg: '$reviews.rating'},
+                }
             }
         }
-
     ]);
   }
 
   async delete(productId: string) {
       console.log('productId', productId);
     await this.productModel.deleteOne({ id: productId });
+    await this.userModel.updateMany(
+        {},
+        {
+            $pull: {
+                products: {
+                    id: productId,
+                },
+            },
+        },
+        { multi: true }
+    );
   }
 
 
@@ -64,22 +81,29 @@ export class ProductService {
                 _id: '$_id',
                 id: {$first: '$id'},
                 author: {$first: '$author'},
+                authorId: {$first: '$authorId'},
                 name: {$first: '$name'},
                 description: {$first: '$description'},
                 image: {$first: '$image'},
-                rating: {$first: '$rating'},
                 quantity: {$first: '$quantity'},
                 price: {$first: '$price'},
                 reviews: {$first: '$reviews'},
                 category: {$first: '$category'},
+            }
+        },
+        {
+            $addFields: {
+                rating: {
+                    rating: {$avg: '$reviews.rating'},
+                }
             }
         }
     ]);
     return products[0];
   }
 
-  async create(product: Product, authorId: string): Promise<Product> {
-    const author = await this.userModel.findOne({ id: authorId });
+  async create(product: Product, token: Token): Promise<Product> {
+    const author = await this.userModel.findOne({ username: token.username });
     if (!author) {
         throw new Error('AuthorId not found');
     }
@@ -87,20 +111,37 @@ export class ProductService {
     console.log('author works', author);
 
     const newProduct = new this.productModel({
-        id: product.id,
         author: author.username,
+        authorId: author.id,
         name: product.name,
         description: product.description,
         image: product.image,
         quantity: product.quantity,
         price: product.price,
-        reviews: product.reviews,
-        category: product.category
+        category: product.category,
     });
 
-    author.products.push(newProduct);
+    const addProductToUser = await this.userModel.findOneAndUpdate(
+        { username: token.username },
+        {
+            $push: {
+                products: {
+                    id: newProduct.id,
+                    name: newProduct.name,
+                    description: newProduct.description,
+                    image: newProduct.image,
+                    quantity: newProduct.quantity,
+                    price: newProduct.price,
+                    category: newProduct.category,
+                },
+            },
+        },
+        { new: true }
+    );
 
-    await Promise.all([newProduct.save(), author.save()]);
+
+
+    await Promise.all([newProduct.save(), addProductToUser.save()]);
 
     return newProduct;
   }

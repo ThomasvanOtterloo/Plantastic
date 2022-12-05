@@ -244,7 +244,7 @@ let AuthService = class AuthService {
             console.log('generateToken', identity);
             if (!identity || !(yield (0, bcrypt_1.compare)(password, identity.hash)))
                 throw new Error("user not authorized");
-            const user = yield this.userModel.findOne({ name: username });
+            const user = yield this.userModel.findOne({ username: username });
             return new Promise((resolve, reject) => {
                 (0, jsonwebtoken_1.sign)({ username, id: user.id }, process.env.JWT_SECRET, (err, token) => {
                     if (err)
@@ -381,9 +381,9 @@ const review_service_1 = __webpack_require__("./apps/data-api/src/app/review/rev
 const order_controller_1 = __webpack_require__("./apps/data-api/src/app/order/order.controller.ts");
 const order_service_1 = __webpack_require__("./apps/data-api/src/app/order/order.service.ts");
 const order_schema_1 = __webpack_require__("./apps/data-api/src/app/order/order.schema.ts");
-const friend_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/friend.schema.ts");
-const friend_service_1 = __webpack_require__("./apps/data-api/src/app/friend/friend.service.ts");
-const friend_controller_1 = __webpack_require__("./apps/data-api/src/app/friend/friend.controller.ts");
+const follow_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.schema.ts");
+const follow_service_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.service.ts");
+const follow_controller_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.controller.ts");
 let DataModule = class DataModule {
 };
 DataModule = tslib_1.__decorate([
@@ -394,7 +394,7 @@ DataModule = tslib_1.__decorate([
                 { name: product_schema_1.Product.name, schema: product_schema_1.ProductSchema },
                 { name: review_schema_1.Review.name, schema: review_schema_1.ReviewSchema },
                 { name: order_schema_1.Order.name, schema: order_schema_1.OrderSchema },
-                { name: friend_schema_1.Friend.name, schema: friend_schema_1.FriendSchema }
+                { name: follow_schema_1.Follow.name, schema: follow_schema_1.FollowSchema }
             ]),
         ],
         controllers: [
@@ -402,14 +402,14 @@ DataModule = tslib_1.__decorate([
             product_controller_1.ProductController,
             review_controller_1.ReviewController,
             order_controller_1.OrderController,
-            friend_controller_1.FriendController
+            follow_controller_1.FollowController
         ],
         providers: [
             user_service_1.UserService,
             product_service_1.ProductService,
             review_service_1.ReviewService,
             order_service_1.OrderService,
-            friend_service_1.FriendService
+            follow_service_1.FollowService
         ],
     })
 ], DataModule);
@@ -418,27 +418,39 @@ exports.DataModule = DataModule;
 
 /***/ }),
 
-/***/ "./apps/data-api/src/app/friend/friend.controller.ts":
+/***/ "./apps/data-api/src/app/friend/follow.controller.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FriendController = void 0;
+exports.FollowController = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const common_1 = __webpack_require__("@nestjs/common");
 const token_decorator_1 = __webpack_require__("./apps/data-api/src/app/auth/token.decorator.ts");
-const friend_service_1 = __webpack_require__("./apps/data-api/src/app/friend/friend.service.ts");
-const friend_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/friend.schema.ts");
-let FriendController = class FriendController {
-    constructor(friendService) {
-        this.friendService = friendService;
+const follow_service_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.service.ts");
+const follow_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.schema.ts");
+let FollowController = class FollowController {
+    constructor(followService) {
+        this.followService = followService;
     }
-    addFriends(token, userId) {
+    CheckIfFollowed(token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                // console.log('friendId: ', userId.userId + '<> token.id: ' + token.id);
-                return this.friendService.addFriend(token.id, userId.userId);
+                return this.followService.GetAllFollowers(token.id);
+            }
+            catch (e) {
+                console.log('DIDNT WORK', e);
+                throw new common_1.HttpException('Error deleting followed user >' + e, 500);
+            }
+        });
+    }
+    Follow(token, followingUser) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('FOLLOWING USER', followingUser);
+                console.log('TOKEN ID', token);
+                return this.followService.Follow(token.id, followingUser.username);
             }
             catch (e) {
                 console.log('DIDNT WORK', e);
@@ -446,117 +458,207 @@ let FriendController = class FriendController {
             }
         });
     }
-    removeFriend(token, userId) {
+    Unfollow(token, username) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                return this.friendService.removeFriend(token.id, userId);
+                return this.followService.Unfollow(token.id, username);
             }
             catch (e) {
                 console.log('DIDNT WORK', e);
-                throw new common_1.HttpException('Error deleting friend >' + e, 500);
+                throw new common_1.HttpException('Error deleting followed user >' + e, 500);
             }
         });
     }
 };
 tslib_1.__decorate([
+    (0, common_1.Get)(),
+    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _b : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], FollowController.prototype, "CheckIfFollowed", null);
+tslib_1.__decorate([
     (0, common_1.Post)(),
     tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
     tslib_1.__param(1, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _b : Object, typeof (_c = typeof friend_schema_1.Friend !== "undefined" && friend_schema_1.Friend) === "function" ? _c : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], FriendController.prototype, "addFriends", null);
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _d : Object, typeof (_e = typeof follow_schema_1.Follow !== "undefined" && follow_schema_1.Follow) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], FollowController.prototype, "Follow", null);
 tslib_1.__decorate([
     (0, common_1.Delete)(':id'),
     tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
     tslib_1.__param(1, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _e : Object, String]),
-    tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
-], FriendController.prototype, "removeFriend", null);
-FriendController = tslib_1.__decorate([
-    (0, common_1.Controller)('friend'),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof friend_service_1.FriendService !== "undefined" && friend_service_1.FriendService) === "function" ? _a : Object])
-], FriendController);
-exports.FriendController = FriendController;
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _g : Object, String]),
+    tslib_1.__metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], FollowController.prototype, "Unfollow", null);
+FollowController = tslib_1.__decorate([
+    (0, common_1.Controller)('follow'),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof follow_service_1.FollowService !== "undefined" && follow_service_1.FollowService) === "function" ? _a : Object])
+], FollowController);
+exports.FollowController = FollowController;
 
 
 /***/ }),
 
-/***/ "./apps/data-api/src/app/friend/friend.schema.ts":
+/***/ "./apps/data-api/src/app/friend/follow.schema.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FriendSchema = exports.Friend = void 0;
+exports.FollowSchema = exports.Follow = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const mongoose_1 = __webpack_require__("@nestjs/mongoose");
 const uuid_1 = __webpack_require__("uuid");
-let Friend = class Friend {
+let Follow = class Follow {
 };
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: uuid_1.v4, index: true }),
     tslib_1.__metadata("design:type", String)
-], Friend.prototype, "id", void 0);
+], Follow.prototype, "id", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
         required: true,
         unique: true,
     }),
     tslib_1.__metadata("design:type", String)
-], Friend.prototype, "userId", void 0);
-Friend = tslib_1.__decorate([
+], Follow.prototype, "userId", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+        unique: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Follow.prototype, "username", void 0);
+Follow = tslib_1.__decorate([
     (0, mongoose_1.Schema)()
-], Friend);
-exports.Friend = Friend;
-exports.FriendSchema = mongoose_1.SchemaFactory.createForClass(Friend);
+], Follow);
+exports.Follow = Follow;
+exports.FollowSchema = mongoose_1.SchemaFactory.createForClass(Follow);
 
 
 /***/ }),
 
-/***/ "./apps/data-api/src/app/friend/friend.service.ts":
+/***/ "./apps/data-api/src/app/friend/follow.service.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FriendService = void 0;
+exports.FollowService = void 0;
 const tslib_1 = __webpack_require__("tslib");
 const common_1 = __webpack_require__("@nestjs/common");
 const mongoose_1 = __webpack_require__("mongoose");
 const mongoose_2 = __webpack_require__("@nestjs/mongoose");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
-const friend_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/friend.schema.ts");
-let FriendService = class FriendService {
-    constructor(userModel, friendModel) {
+const follow_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.schema.ts");
+let FollowService = class FollowService {
+    constructor(userModel, followModel) {
         this.userModel = userModel;
-        this.friendModel = friendModel;
+        this.followModel = followModel;
     }
-    addFriend(userId, friendId) {
+    Follow(tokenId, username) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const friend = yield this.userModel.findOne({ id: friendId });
-            yield this.userModel.updateOne({ id: userId }, { $addToSet: { friends: { friend } } });
-            return this.userModel.findOne({
-                id: userId,
-            });
+            const findFollowingUser = yield this.userModel.aggregate([
+                {
+                    $match: {
+                        username: username,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        // products: {$first: '$products'},
+                    }
+                }
+            ]);
+            yield Promise.all([
+                yield this.userModel.updateOne({ id: tokenId }, { $push: { following: findFollowingUser } })
+            ]);
+            return this.userModel.aggregate([
+                {
+                    $match: {
+                        id: tokenId,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        following: { $first: '$following' },
+                    }
+                }
+            ]);
         });
     }
-    removeFriend(userId, friendId) {
+    Unfollow(userId, followingUsername) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.userModel.updateOne({ id: userId }, { $pull: { friends: { id: friendId } } });
-            return this.userModel.findOne({
-                id: userId,
-            });
+            const findFollowingUser = yield this.userModel.aggregate([
+                {
+                    $match: {
+                        username: followingUsername,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        // products: {$first: '$products'},
+                    }
+                }
+            ]);
+            yield Promise.all([
+                yield this.userModel.updateOne({ id: userId }, { $pull: { following: findFollowingUser } })
+            ]);
+            return yield this.userModel.aggregate([
+                {
+                    $match: {
+                        id: userId,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        following: { $first: '$following' },
+                    }
+                }
+            ]);
+        });
+    }
+    GetAllFollowers(userId) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.userModel.aggregate([
+                {
+                    $match: {
+                        id: userId,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        id: { $first: '$id' },
+                        username: { $first: '$username' },
+                        following: { $first: '$following' },
+                    }
+                }
+            ]);
         });
     }
 };
-FriendService = tslib_1.__decorate([
+FollowService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
-    tslib_1.__param(1, (0, mongoose_2.InjectModel)(friend_schema_1.Friend.name)),
+    tslib_1.__param(1, (0, mongoose_2.InjectModel)(follow_schema_1.Follow.name)),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object])
-], FriendService);
-exports.FriendService = FriendService;
+], FollowService);
+exports.FollowService = FollowService;
 
 
 /***/ }),
@@ -585,7 +687,7 @@ let OrderController = class OrderController {
     create(token, order) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.orderService.create(order, token.id);
+                return yield this.orderService.create(order, token);
             }
             catch (e) {
                 console.log('error', e);
@@ -656,13 +758,25 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Number)
 ], Order.prototype, "quantity", void 0);
 tslib_1.__decorate([
-    (0, mongoose_1.Prop)(),
+    (0, mongoose_1.Prop)({
+        required: false,
+        unique: false,
+    }),
     tslib_1.__metadata("design:type", Number)
 ], Order.prototype, "total", void 0);
 tslib_1.__decorate([
-    (0, mongoose_1.Prop)(),
+    (0, mongoose_1.Prop)({
+        required: false,
+        unique: false,
+    }),
+    tslib_1.__metadata("design:type", Number)
+], Order.prototype, "productPrice", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+    }),
     tslib_1.__metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], Order.prototype, "deliverDate", void 0);
+], Order.prototype, "deliveryDate", void 0);
 Order = tslib_1.__decorate([
     (0, mongoose_1.Schema)()
 ], Order);
@@ -709,6 +823,14 @@ let OrderService = class OrderService {
                         total: { $first: '$total' },
                         deliveryDate: { $first: '$deliveryDate' },
                     }
+                },
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'productId',
+                        foreignField: 'id',
+                        as: 'product',
+                    }
                 }
             ]);
         });
@@ -735,28 +857,31 @@ let OrderService = class OrderService {
             return products[0];
         });
     }
-    create(order, authorId) {
+    create(order, token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const product = yield this.productModel.findOne({ id: order.productId });
-            const author = yield this.userModel.findOne({ id: authorId });
-            if (!author) {
-                console.log(author);
-                throw new Error('authorId not found');
+            const author = yield this.userModel.findOne({ id: token.id });
+            if (product && author) {
+                const newOrder = new this.orderModel({
+                    authorId: token.id,
+                    productId: order.productId,
+                    quantity: order.quantity,
+                    total: order.quantity * product.price,
+                    productPrice: product.price,
+                    deliveryDate: new Date().setDate(new Date().getDate() + 7),
+                });
+                console.log('newOrder', newOrder.deliveryDate.toLocaleString());
+                author.orders.push(newOrder);
+                const updateUser = yield this.userModel.findOneAndUpdate({ id: token.id }, { $set: {
+                        orders: author.orders,
+                        wallet: author.wallet - newOrder.total,
+                    } });
+                const updateProduct = yield this.productModel.findOneAndUpdate({ id: order.productId }, { $set: {
+                        quantity: product.quantity - order.quantity,
+                    } });
+                yield Promise.all([updateUser, updateProduct]);
+                return newOrder.save();
             }
-            if (!product) {
-                console.log("product: " + product);
-                throw new Error('productId not found');
-            }
-            const newOrder = new this.orderModel({
-                productId: order.productId,
-                authorId: authorId,
-                quantity: order.quantity,
-                total: product.price * order.quantity,
-                deliverDate: new Date(),
-            });
-            author.orders.push(newOrder.id);
-            yield Promise.all([author.save(), product.save(), newOrder.save()]);
-            return newOrder;
         });
     }
 };
@@ -804,7 +929,7 @@ let ProductController = class ProductController {
                 product.image = 'https://static.vecteezy.com/system/resources/previews/002/425/076/non_2x/plant-leaves-in-a-pot-beautiful-green-houseplant-isolated-simple-trendy-flat-style-for-interior-garden-decoration-design-free-vector.jpg';
             }
             try {
-                return yield this.productService.create(product, token.id);
+                return yield this.productService.create(product, token);
             }
             catch (e) {
                 console.log('error', e);
@@ -899,14 +1024,6 @@ tslib_1.__decorate([
 ], Product.prototype, "description", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
-        required: false,
-        default: 0,
-        validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
-    }),
-    tslib_1.__metadata("design:type", Number)
-], Product.prototype, "rating", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
         required: true,
     }),
     tslib_1.__metadata("design:type", Number)
@@ -923,6 +1040,12 @@ tslib_1.__decorate([
     }),
     tslib_1.__metadata("design:type", String)
 ], Product.prototype, "author", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Product.prototype, "authorId", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
         required: false,
@@ -987,11 +1110,17 @@ let ProductService = class ProductService {
                         name: { $first: '$name' },
                         description: { $first: '$description' },
                         image: { $first: '$image' },
-                        rating: { $avg: '$reviews.rating' },
                         quantity: { $first: '$quantity' },
                         price: { $first: '$price' },
                         reviews: { $first: '$reviews' },
                         category: { $first: '$category' },
+                    },
+                },
+                {
+                    $addFields: {
+                        rating: {
+                            rating: { $avg: '$reviews.rating' },
+                        }
                     }
                 }
             ]);
@@ -1001,6 +1130,13 @@ let ProductService = class ProductService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             console.log('productId', productId);
             yield this.productModel.deleteOne({ id: productId });
+            yield this.userModel.updateMany({}, {
+                $pull: {
+                    products: {
+                        id: productId,
+                    },
+                },
+            }, { multi: true });
         });
     }
     getOne(productId) {
@@ -1016,40 +1152,58 @@ let ProductService = class ProductService {
                         _id: '$_id',
                         id: { $first: '$id' },
                         author: { $first: '$author' },
+                        authorId: { $first: '$authorId' },
                         name: { $first: '$name' },
                         description: { $first: '$description' },
                         image: { $first: '$image' },
-                        rating: { $first: '$rating' },
                         quantity: { $first: '$quantity' },
                         price: { $first: '$price' },
                         reviews: { $first: '$reviews' },
                         category: { $first: '$category' },
+                    }
+                },
+                {
+                    $addFields: {
+                        rating: {
+                            rating: { $avg: '$reviews.rating' },
+                        }
                     }
                 }
             ]);
             return products[0];
         });
     }
-    create(product, authorId) {
+    create(product, token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const author = yield this.userModel.findOne({ id: authorId });
+            const author = yield this.userModel.findOne({ username: token.username });
             if (!author) {
                 throw new Error('AuthorId not found');
             }
             console.log('author works', author);
             const newProduct = new this.productModel({
-                id: product.id,
                 author: author.username,
+                authorId: author.id,
                 name: product.name,
                 description: product.description,
                 image: product.image,
                 quantity: product.quantity,
                 price: product.price,
-                reviews: product.reviews,
-                category: product.category
+                category: product.category,
             });
-            author.products.push(newProduct);
-            yield Promise.all([newProduct.save(), author.save()]);
+            const addProductToUser = yield this.userModel.findOneAndUpdate({ username: token.username }, {
+                $push: {
+                    products: {
+                        id: newProduct.id,
+                        name: newProduct.name,
+                        description: newProduct.description,
+                        image: newProduct.image,
+                        quantity: newProduct.quantity,
+                        price: newProduct.price,
+                        category: newProduct.category,
+                    },
+                },
+            }, { new: true });
+            yield Promise.all([newProduct.save(), addProductToUser.save()]);
             return newProduct;
         });
     }
@@ -1090,7 +1244,7 @@ exports.ProductService = ProductService;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReviewController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -1124,9 +1278,9 @@ let ReviewController = class ReviewController {
             }
         });
     }
-    delete(id) {
+    delete(token, id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.reviewService.delete(id);
+            return this.reviewService.delete(token, id);
         });
     }
     update(id, review) {
@@ -1160,18 +1314,19 @@ tslib_1.__decorate([
 ], ReviewController.prototype, "create", null);
 tslib_1.__decorate([
     (0, common_1.Delete)(':id'),
-    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
+    tslib_1.__param(1, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [String]),
-    tslib_1.__metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _g : Object, String]),
+    tslib_1.__metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ReviewController.prototype, "delete", null);
 tslib_1.__decorate([
     (0, common_1.Patch)(':id'),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__param(1, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [String, typeof (_h = typeof data_1.Review !== "undefined" && data_1.Review) === "function" ? _h : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    tslib_1.__metadata("design:paramtypes", [String, typeof (_j = typeof data_1.Review !== "undefined" && data_1.Review) === "function" ? _j : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ReviewController.prototype, "update", null);
 ReviewController = tslib_1.__decorate([
     (0, common_1.Controller)('review'),
@@ -1186,6 +1341,7 @@ exports.ReviewController = ReviewController;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReviewSchema = exports.Review = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -1211,6 +1367,13 @@ tslib_1.__decorate([
     }),
     tslib_1.__metadata("design:type", String)
 ], Review.prototype, "authorId", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: true,
+        default: Date.now
+    }),
+    tslib_1.__metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Review.prototype, "datetime", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
         required: true,
@@ -1286,12 +1449,13 @@ let ReviewService = class ReviewService {
             ]);
         });
     }
-    delete(id) {
+    delete(token, id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            console.log(id);
-            yield this.reviewModel.deleteOne({ id: id });
-            yield this.userModel.updateMany({}, { $pull: { reviews: { id: id } } });
-            yield this.productModel.updateMany({}, { $pull: { reviews: { id: id } } });
+            yield Promise.all([
+                this.userModel.updateMany({ username: token.username }, { $pull: { reviews: { id: id } } }),
+                this.productModel.updateMany({}, { $pull: { reviews: { id: id } } }),
+                this.reviewModel.deleteOne({ id: id }),
+            ]);
         });
     }
     getOne(productId) {
@@ -1368,6 +1532,9 @@ let ReviewService = class ReviewService {
             }
             return updatedReview;
         });
+    }
+    formatReviewDate(date) {
+        return date.toLocaleString('en-us', { month: 'short', year: 'numeric', day: 'numeric' });
     }
 };
 ReviewService = tslib_1.__decorate([
@@ -1476,7 +1643,7 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: [] }),
     tslib_1.__metadata("design:type", Array)
-], User.prototype, "friends", void 0);
+], User.prototype, "following", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: [] }),
     tslib_1.__metadata("design:type", Array)
@@ -1529,9 +1696,10 @@ let UserService = class UserService {
                         id: { $first: '$id' },
                         username: { $first: '$username' },
                         wallet: { $first: '$wallet' },
-                        products: { $push: '$products' },
-                        reviews: { $push: '$reviews' },
-                        friends: { $push: '$friends' }
+                        products: { $first: '$products' },
+                        reviews: { $first: '$reviews' },
+                        following: { $first: '$following' },
+                        orders: { $first: '$orders' },
                     },
                 }]);
         });
@@ -1549,10 +1717,10 @@ let UserService = class UserService {
                         id: { $first: '$id' },
                         username: { $first: '$username' },
                         wallet: { $first: '$wallet' },
-                        products: { $push: '$products' },
-                        reviews: { $push: '$reviews' },
-                        friends: { $push: '$friends' },
-                        orders: { $push: '$orders' },
+                        products: { $first: '$products' },
+                        reviews: { $first: '$reviews' },
+                        following: { $first: '$following' },
+                        orders: { $first: '$orders' },
                     }
                 }]);
             console.log('users', users);
@@ -1583,6 +1751,7 @@ tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/review.interface.t
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/user.interface.ts"), exports);
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/api-response.interface.ts"), exports);
 tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/auth.interface.ts"), exports);
+tslib_1.__exportStar(__webpack_require__("./libs/data/src/lib/order.interface.ts"), exports);
 
 
 /***/ }),
@@ -1615,6 +1784,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /***/ }),
 
 /***/ "./libs/data/src/lib/id.type.ts":
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
+/***/ "./libs/data/src/lib/order.interface.ts":
 /***/ ((__unused_webpack_module, exports) => {
 
 

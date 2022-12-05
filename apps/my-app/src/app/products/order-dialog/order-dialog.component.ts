@@ -1,6 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {Product} from "../component-product-model";
+import {OrderService} from "./order.service";
+import {Order} from "@find-a-buddy/data";
 
 @Component({
   selector: 'app-order-dialog',
@@ -11,23 +13,49 @@ export class OrderDialogComponent implements OnInit {
   product: Product | undefined;
   wallet: number = 1000;
   quantity: number = 1;
-  total: number | undefined;
+    total: number = 0;
+
+    order: Order = {
+    productId: '',
+    quantity: 0
+    }
+
 
   constructor(
     public dialogRef: MatDialogRef<OrderDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any) {}
+    private _orderService: OrderService,
+    @Inject(MAT_DIALOG_DATA) public data: any) {
+    this.total = this.data.Product.price * this.quantity;
+    this.order.productId = this.data.Product.id;
+  }
+
 
   ngOnInit(): void {
     this.product = this.data.Product;
     console.log(this.product + "testing product");
-    this.total = this.data.Product.price * this.quantity;
+
   }
-
-
-
 
   onNoClick(): void {
     this.dialogRef.close();
   }
 
+  changeTt(e: any) {
+      this.order.quantity = e.target.value;
+    this.total = this.data.Product.price * e.target.value;
+  }
+
+  orderConfirm() {
+    if (this.wallet >= this.total) {
+        this._orderService.createOrder(this.order).subscribe((res) => {
+
+            console.log(res);
+        });
+        this.dialogRef.close();
+    } else {
+        alert("Not enough money in your wallet");
+    }
+
+    this.dialogRef.close();
+  }
 }

@@ -24,7 +24,7 @@ export class ReviewComponent implements OnInit {
   description: any;
 
   subscriptionParams!: Subscription;
-  user!: UserInfo;
+  localUser!: UserInfo;
 
 
 
@@ -42,7 +42,15 @@ export class ReviewComponent implements OnInit {
   @Output() onReviewChange = new EventEmitter<Product[]>();
 
   ngOnInit(): void {
+      const userData = localStorage.getItem('currentuser');
+      if (userData) {
+          const localUser = JSON.parse(userData);
+            this.localUser = localUser;
+            console.log('local user', this.localUser);
+      }
+
   }
+
 
 
 
@@ -92,6 +100,11 @@ export class ReviewComponent implements OnInit {
                 console.log('product after chagne of review', this.onReviewChange);
             }
         );
+    }
+
+    formatReviewDate(date: Date) {
+        const newdate = new Date(date);
+        return newdate.toLocaleString('en-us',{month:'short', year:'numeric', day:'numeric'})
     }
 
 

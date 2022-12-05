@@ -19,9 +19,9 @@ import {ReviewService} from "./review/review.service";
 import {OrderController} from "./order/order.controller";
 import {OrderService} from "./order/order.service";
 import {Order, OrderSchema} from "./order/order.schema";
-import {Friend, FriendSchema} from "./friend/friend.schema";
-import {FriendService} from "./friend/friend.service";
-import {FriendController} from "./friend/friend.controller";
+import {Follow, FollowSchema} from "./friend/follow.schema";
+import {FollowService} from "./friend/follow.service";
+import {FollowController} from "./friend/follow.controller";
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import {FriendController} from "./friend/friend.controller";
       { name: Product.name, schema: ProductSchema },
       { name: Review.name, schema: ReviewSchema },
       { name: Order.name, schema:  OrderSchema },
-      { name: Friend.name, schema: FriendSchema}
+      { name: Follow.name, schema: FollowSchema}
     ]),
   ],
   controllers: [
@@ -38,14 +38,14 @@ import {FriendController} from "./friend/friend.controller";
     ProductController,
     ReviewController,
     OrderController,
-    FriendController
+    FollowController
   ],
   providers: [
     UserService,
     ProductService,
     ReviewService,
     OrderService,
-    FriendService
+    FollowService
   ],
 })
 export class DataModule {}

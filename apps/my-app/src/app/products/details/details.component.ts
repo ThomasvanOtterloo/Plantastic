@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {Product} from "@find-a-buddy/data";
+import {Product, UserInfo} from "@find-a-buddy/data";
 import {ProductService} from "../product.api.service";
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {OrderDialogComponent} from "../order-dialog/order-dialog.component";
-import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-details',
@@ -15,6 +14,7 @@ import {Observable} from "rxjs";
 export class DetailsComponent implements OnInit {
   componentId: string | null | undefined;
   product: any;
+  localUser!: UserInfo;
 
   isFollowed: boolean = false;
   followState:string = "Follow";
@@ -25,6 +25,8 @@ export class DetailsComponent implements OnInit {
     private _productService: ProductService,
     public dialog: MatDialog
   ) {}
+
+
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -43,7 +45,15 @@ export class DetailsComponent implements OnInit {
         console.log("Nieuwe component");
       }
     });
+
+    const userData = localStorage.getItem('currentuser');
+    if (userData) {
+      this.localUser = JSON.parse(userData);
+      console.log('local user', this.localUser);
+    }
+
   }
+
 
   delete() {
     if (this.componentId) {
@@ -81,14 +91,18 @@ export class DetailsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(() => {
       console.log('The dialog was closed');
-
     });
   }
 
   onReviewChange($event: Product[]) {
     console.log($event);
     this.product = $event;
+  }
 
+  getAvgRating() {
+    return this.product.reviews.map((review: any) => {
+      return review.rating;
+    }).reduce((a: number, b: number) => a + b, 0) / this.product.reviews.length;
   }
 
 

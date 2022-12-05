@@ -20,7 +20,7 @@ export class OrderController {
     @Post()
     async create(@InjectToken() token: Token,  @Body() order: Order): Promise<Order> {
         try {
-            return await this.orderService.create(order , token.id );
+            return await this.orderService.create(order , token );
         }
         catch (e) {
             console.log('error', e);

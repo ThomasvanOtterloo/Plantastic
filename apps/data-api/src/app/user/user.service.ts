@@ -27,9 +27,10 @@ export class UserService {
             id: {$first: '$id'},
             username: {$first: '$username'},
             wallet: {$first: '$wallet'},
-            products: {$push: '$products'},
-            reviews: {$push: '$reviews'},
-            friends: {$push: '$friends'}
+            products: {$first: '$products'},
+            reviews: {$first: '$reviews'},
+            following: {$first: '$following'},
+            orders: {$first: '$orders'},
           },
         }]);
   }
@@ -45,10 +46,10 @@ export class UserService {
           id: {$first: '$id'},
           username: {$first: '$username'},
           wallet: {$first: '$wallet'},
-          products: {$push: '$products'},
-          reviews: {$push: '$reviews'},
-          friends: {$push: '$friends'},
-              orders: {$push: '$orders'},
+          products: {$first: '$products'},
+          reviews: {$first: '$reviews'},
+          following: {$first: '$following'},
+          orders: {$first: '$orders'},
         }
       }]);
     console.log('users', users);

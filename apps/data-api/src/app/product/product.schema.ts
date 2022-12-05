@@ -23,12 +23,12 @@ export class Product {
   })
   description: string;
 
-  @Prop({
-    required: false,
-    default: 0,
-    validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
-  })
-  rating: number;
+  // @Prop({
+  //   required: false,
+  //   default: 0,
+  //   validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
+  // })
+  // rating: number;
 
 
   @Prop({
@@ -45,6 +45,11 @@ export class Product {
     required: true,
   })
   author: string;
+
+  @Prop({
+    required: true,
+  })
+  authorId: string;
 
   @Prop({
     required: false,

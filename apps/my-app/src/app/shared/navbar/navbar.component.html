@@ -7,6 +7,7 @@
     <div class="site-menu col-8">
       <a routerLink="" routerLinkActive="active" ariaCurrentWhenActive="page">Home</a>
       <a routerLink="/about" routerLinkActive="active" ariaCurrentWhenActive="page" >About</a>
+      <a *ngIf="isLoggedIn" routerLink="/order" routerLinkActive="active" ariaCurrentWhenActive="page">Orders</a>
       <a routerLink="/sellers" routerLinkActive="active" ariaCurrentWhenActive="page">Sellers</a>
       <a *ngIf="!isLoggedIn" routerLink="/login" routerLinkActive="active" ariaCurrentWhenActive="page">Login</a>
       <a *ngIf="!isLoggedIn" routerLink="/register" routerLinkActive="/active"  ariaCurrentWhenActive="page">Register</a>

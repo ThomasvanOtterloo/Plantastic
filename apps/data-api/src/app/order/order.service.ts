@@ -6,6 +6,7 @@ import {InjectModel} from '@nestjs/mongoose';
 import {User, UserDocument} from "../user/user.schema";
 import {Product, ProductDocument} from "../product/product.schema";
 import {Order, OrderDocument} from "./order.schema";
+import {Token} from "../auth/token.decorator";
 
 
 @Injectable()
@@ -17,6 +18,7 @@ export class OrderService {
   ) {}
 
   async getAll(token : string): Promise<Order[]> {
+
     return this.orderModel.aggregate([{
         $match: {
             authorId: token,
@@ -30,6 +32,15 @@ export class OrderService {
                 quantity: {$first: '$quantity'},
                 total: {$first: '$total'},
                 deliveryDate: {$first: '$deliveryDate'},
+
+            }
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'productId',
+                foreignField: 'id',
+                as: 'product',
             }
         }
     ]);
@@ -55,33 +66,41 @@ export class OrderService {
     return products[0];
   }
 
-  async create(order: Order, authorId: string): Promise<Order> {
+  async create(order: Order, token: Token): Promise<Order> {
     const product = await this.productModel.findOne({ id: order.productId });
-    const author = await this.userModel.findOne({ id: authorId});
+    const author = await this.userModel.findOne({ id: token.id});
 
-    if (!author) {
-        console.log(author)
-        throw new Error('authorId not found');
+    if (product && author) {
+        const newOrder = new this.orderModel({
+            authorId: token.id,
+            productId: order.productId,
+            quantity: order.quantity,
+            total: order.quantity * product.price,
+            productPrice: product.price,
+            deliveryDate: new Date().setDate( new Date().getDate() + 7 ),
+        });
+
+        console.log('newOrder', newOrder.deliveryDate.toLocaleString());
+
+        author.orders.push(newOrder);
+
+        const updateUser = await this.userModel.findOneAndUpdate(
+            { id: token.id },
+            { $set: {
+                orders: author.orders,
+                    wallet: author.wallet - newOrder.total,
+            } },
+        );
+
+        const updateProduct = await this.productModel.findOneAndUpdate(
+            { id: order.productId },
+            { $set: {
+                quantity: product.quantity - order.quantity,
+            } },
+        );
+
+        await Promise.all([updateUser, updateProduct]);
+        return newOrder.save();
     }
-
-      if (!product) {
-          console.log("product: " + product)
-          throw new Error('productId not found');
-      }
-
-
-    const newOrder = new this.orderModel({
-        productId: order.productId,
-        authorId: authorId,
-        quantity: order.quantity,
-        total: product.price * order.quantity,
-        deliverDate: new Date(),
-    });
-
-      author.orders.push(newOrder.id);
-
-    await Promise.all([author.save(), product.save(), newOrder.save()]);
-
-    return newOrder;
   }
 }

@@ -28,11 +28,28 @@ export class Order {
   })
   quantity: number;
 
-  @Prop()
+  @Prop({
+    required: false,
+    unique: false,
+  })
   total: number;
 
-  @Prop()
-  deliverDate: Date;
+  @Prop({
+    required: false,
+    unique: false,
+  })
+  productPrice: number;
+
+  @Prop({
+    required: true,
+  })
+  deliveryDate: Date;
+
+
+
+
+
+
 
 
 }
