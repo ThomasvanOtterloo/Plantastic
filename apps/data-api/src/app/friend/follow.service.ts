@@ -96,9 +96,6 @@ export class FollowService {
             ]);
     }
 
-
-
-
     async GetAllFollowers(userId: string): Promise<Follow[]> {
 
         return this.userModel.aggregate([

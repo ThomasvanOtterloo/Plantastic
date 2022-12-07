@@ -51,8 +51,18 @@ export class ProductService {
     ]);
   }
 
-  async delete(productId: string) {
+  async delete(productId: string, token: Token){
       console.log('productId', productId);
+      const product = await this.productModel.findOne({ id: productId });
+        if (!product) {
+            throw new Error('Product not found');
+        }
+
+      if (product.authorId !== token.id) {
+            throw new Error('You are not allowed to delete this product');
+      }
+
+
     await this.productModel.deleteOne({ id: productId });
     await this.userModel.updateMany(
         {},
@@ -103,6 +113,7 @@ export class ProductService {
   }
 
   async create(product: Product, token: Token): Promise<Product> {
+      console.log(product)
     const author = await this.userModel.findOne({ username: token.username });
     if (!author) {
         throw new Error('AuthorId not found');
@@ -164,7 +175,24 @@ export class ProductService {
     return newProduct;
   }
 
-    async update(productId: string , product: Product): Promise<Product> {
+    async update(productId: string , product: Product, token: Token): Promise<Product> {
+        if (product.authorId !== token.id) {
+            throw new Error('You are not allowed to update this product');
+        }
+        if (product.price <1) {
+            throw new Error('Price must be greater than 1');
+        }
+        if (product.quantity <2) {
+            throw new Error('Quantity must be greater than 2');
+        }
+        if (product.category.length <1) {
+            throw new Error('Category must be greater than 1');
+        }
+        if (product.name.length <1) {
+            throw new Error('Name must be greater than 1 character');
+        }
+
+
         const updatedProduct = await this.productModel.findOneAndUpdate(
             { id: productId },
             {

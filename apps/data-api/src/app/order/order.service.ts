@@ -103,4 +103,39 @@ export class OrderService {
         return newOrder.save();
     }
   }
+
+    async delete(orderId: string, token: Token): Promise<Order> {
+        const order = await this.orderModel.findOne
+        ({ id: orderId });
+
+        if (order.authorId === token.id) {
+            const product = await this.productModel.findOne({ id: order.productId });
+            const author = await this.userModel.findOne({ id: token.id});
+
+            if (product && author) {
+                const updateUser = await this.userModel.findOneAndUpdate(
+                    { id: token.id },
+                    { $set: {
+                        wallet: author.wallet + order.total,
+                    } },
+                );
+
+                const updateProduct = await this.productModel.findOneAndUpdate(
+                    { id: order.productId },
+                    { $set: {
+                        quantity: product.quantity + order.quantity,
+                    } },
+                );
+
+                await Promise.all([updateUser, updateProduct]);
+                return this.orderModel.findOneAndDelete({ id: orderId
+
+                });
+            }
+        } else {
+            throw new Error('You can not delete this order');
+        }
+    }
+
+
 }

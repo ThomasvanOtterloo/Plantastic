@@ -24,4 +24,5 @@ export interface User extends UserInfo {
     wallet: number
     following: UserIdentity[]
     products: Id[]
+    orders: Id[]
 }

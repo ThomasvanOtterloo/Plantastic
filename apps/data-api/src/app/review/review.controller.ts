@@ -24,10 +24,8 @@ export class ReviewController {
 
 
     @Post(':id')
-    async create(@InjectToken() token: Token, @Param('id') productId: string ,  @Body() review: Review): Promise<Review> {
+    async create(@InjectToken() token: Token, @Param('id') productId: string ,  @Body() review: Review): Promise<any> {
         try {
-
-            console.log('productid:>>>' , productId)
             return await this.reviewService.create(review , token, productId);
         }
         catch (e) {

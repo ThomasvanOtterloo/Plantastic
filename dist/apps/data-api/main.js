@@ -241,7 +241,7 @@ let AuthService = class AuthService {
     generateToken(username, password) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const identity = yield this.identityModel.findOne({ username });
-            console.log('generateToken', identity);
+            console.log(username, password, identity);
             if (!identity || !(yield (0, bcrypt_1.compare)(password, identity.hash)))
                 throw new Error("user not authorized");
             const user = yield this.userModel.findOne({ username: username });
@@ -667,7 +667,7 @@ exports.FollowService = FollowService;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrderController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -691,7 +691,18 @@ let OrderController = class OrderController {
             }
             catch (e) {
                 console.log('error', e);
-                throw new common_1.HttpException('Error creating product >' + e, 500);
+                throw new common_1.HttpException('Error creating product >' + e, common_1.HttpStatus.BAD_REQUEST);
+            }
+        });
+    }
+    delete(token, orderId) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield this.orderService.delete(orderId, token);
+            }
+            catch (e) {
+                console.log('error', e);
+                throw new common_1.HttpException('Error creating product >' + e, common_1.HttpStatus.BAD_REQUEST);
             }
         });
     }
@@ -711,6 +722,14 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _d : Object, typeof (_e = typeof order_schema_1.Order !== "undefined" && order_schema_1.Order) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], OrderController.prototype, "create", null);
+tslib_1.__decorate([
+    (0, common_1.Delete)(':id'),
+    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
+    tslib_1.__param(1, (0, common_1.Param)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _g : Object, String]),
+    tslib_1.__metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], OrderController.prototype, "delete", null);
 OrderController = tslib_1.__decorate([
     (0, common_1.Controller)('order'),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof order_service_1.OrderService !== "undefined" && order_service_1.OrderService) === "function" ? _a : Object])
@@ -766,17 +785,24 @@ tslib_1.__decorate([
 ], Order.prototype, "total", void 0);
 tslib_1.__decorate([
     (0, mongoose_1.Prop)({
-        required: false,
-        unique: false,
-    }),
-    tslib_1.__metadata("design:type", Number)
-], Order.prototype, "productPrice", void 0);
-tslib_1.__decorate([
-    (0, mongoose_1.Prop)({
         required: true,
     }),
     tslib_1.__metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Order.prototype, "deliveryDate", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: false,
+        unique: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Order.prototype, "productImage", void 0);
+tslib_1.__decorate([
+    (0, mongoose_1.Prop)({
+        required: false,
+        unique: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Order.prototype, "productName", void 0);
 Order = tslib_1.__decorate([
     (0, mongoose_1.Schema)()
 ], Order);
@@ -884,6 +910,29 @@ let OrderService = class OrderService {
             }
         });
     }
+    delete(orderId, token) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const order = yield this.orderModel.findOne({ id: orderId });
+            if (order.authorId === token.id) {
+                const product = yield this.productModel.findOne({ id: order.productId });
+                const author = yield this.userModel.findOne({ id: token.id });
+                if (product && author) {
+                    const updateUser = yield this.userModel.findOneAndUpdate({ id: token.id }, { $set: {
+                            wallet: author.wallet + order.total,
+                        } });
+                    const updateProduct = yield this.productModel.findOneAndUpdate({ id: order.productId }, { $set: {
+                            quantity: product.quantity + order.quantity,
+                        } });
+                    yield Promise.all([updateUser, updateProduct]);
+                    return this.orderModel.findOneAndDelete({ id: orderId
+                    });
+                }
+            }
+            else {
+                throw new Error('You can not delete this order');
+            }
+        });
+    }
 };
 OrderService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
@@ -901,7 +950,7 @@ exports.OrderService = OrderService;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -937,15 +986,21 @@ let ProductController = class ProductController {
             }
         });
     }
-    delete(id) {
+    delete(token, id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.productService.delete(id);
+            yield this.productService.delete(id, token);
             return null;
         });
     }
-    update(id, product) {
+    update(token, id, product) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return this.productService.update(id, product);
+            try {
+                return yield this.productService.update(id, product, token);
+            }
+            catch (e) {
+                console.log('error', e);
+                throw new common_1.HttpException('Error updating product >' + e, common_1.HttpStatus.BAD_REQUEST);
+            }
         });
     }
 };
@@ -972,18 +1027,20 @@ tslib_1.__decorate([
 ], ProductController.prototype, "create", null);
 tslib_1.__decorate([
     (0, common_1.Delete)(':id'),
-    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
+    tslib_1.__param(1, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [String]),
-    tslib_1.__metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _g : Object, String]),
+    tslib_1.__metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ProductController.prototype, "delete", null);
 tslib_1.__decorate([
     (0, common_1.Patch)(':id'),
-    tslib_1.__param(0, (0, common_1.Param)('id')),
-    tslib_1.__param(1, (0, common_1.Body)()),
+    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
+    tslib_1.__param(1, (0, common_1.Param)('id')),
+    tslib_1.__param(2, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [String, typeof (_h = typeof data_1.Product !== "undefined" && data_1.Product) === "function" ? _h : Object]),
-    tslib_1.__metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    tslib_1.__metadata("design:paramtypes", [typeof (_j = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _j : Object, String, typeof (_k = typeof data_1.Product !== "undefined" && data_1.Product) === "function" ? _k : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ProductController.prototype, "update", null);
 ProductController = tslib_1.__decorate([
     (0, common_1.Controller)('product'),
@@ -1126,9 +1183,16 @@ let ProductService = class ProductService {
             ]);
         });
     }
-    delete(productId) {
+    delete(productId, token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             console.log('productId', productId);
+            const product = yield this.productModel.findOne({ id: productId });
+            if (!product) {
+                throw new Error('Product not found');
+            }
+            if (product.authorId !== token.id) {
+                throw new Error('You are not allowed to delete this product');
+            }
             yield this.productModel.deleteOne({ id: productId });
             yield this.userModel.updateMany({}, {
                 $pull: {
@@ -1175,6 +1239,7 @@ let ProductService = class ProductService {
     }
     create(product, token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log(product);
             const author = yield this.userModel.findOne({ username: token.username });
             if (!author) {
                 throw new Error('AuthorId not found');
@@ -1222,8 +1287,23 @@ let ProductService = class ProductService {
             return newProduct;
         });
     }
-    update(productId, product) {
+    update(productId, product, token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (product.authorId !== token.id) {
+                throw new Error('You are not allowed to update this product');
+            }
+            if (product.price < 1) {
+                throw new Error('Price must be greater than 1');
+            }
+            if (product.quantity < 2) {
+                throw new Error('Quantity must be greater than 2');
+            }
+            if (product.category.length < 1) {
+                throw new Error('Category must be greater than 1');
+            }
+            if (product.name.length < 1) {
+                throw new Error('Name must be greater than 1 character');
+            }
             const updatedProduct = yield this.productModel.findOneAndUpdate({ id: productId }, Object.assign({}, product), { new: true });
             const updatedAuthor = yield this.userModel.findOneAndUpdate({ username: updatedProduct.author }, {
                 $set: {
@@ -1284,7 +1364,6 @@ let ReviewController = class ReviewController {
     create(token, productId, review) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('productid:>>>', productId);
                 return yield this.reviewService.create(review, token, productId);
             }
             catch (e) {
@@ -1407,6 +1486,7 @@ tslib_1.__decorate([
     (0, mongoose_1.Prop)({
         required: true,
         unique: false,
+        default: 0,
         validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
     }),
     tslib_1.__metadata("design:type", Number)
@@ -1466,6 +1546,10 @@ let ReviewService = class ReviewService {
     }
     delete(token, id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const findUserWithReview = yield this.userModel.findOne({ id: token.id, reviews: { $elemMatch: { id: id } } });
+            if (!findUserWithReview) {
+                throw new Error(`Review with id ${id} not found`);
+            }
             yield Promise.all([
                 this.userModel.updateMany({ username: token.username }, { $pull: { reviews: { id: id } } }),
                 this.productModel.updateMany({}, { $pull: { reviews: { id: id } } }),
@@ -1501,11 +1585,17 @@ let ReviewService = class ReviewService {
             review.authorId = author.id;
             review.author = author.username;
             review.productId = productId;
+            if (review.rating > 10 || review.rating < 0 || review.rating % 1 !== 0) {
+                throw new common_1.NotFoundException(`Rating must be between 0 and 10`);
+            }
+            if (review.description === '') {
+                throw new common_1.NotFoundException(`Description must not be empty`);
+            }
             const newReview = new this.reviewModel(Object.assign({}, review));
             const createdReview = yield this.userModel.findOneAndUpdate({ id: author.id }, { $push: { reviews: newReview } });
             const createdReview2 = yield this.productModel.findOneAndUpdate({ id: productId }, { $push: { reviews: newReview } });
-            yield Promise.all([createdReview.save(), createdReview2.save(), newReview.save()]);
-            return this.reviewModel.findOne({ id: review.id });
+            yield Promise.all([createdReview, createdReview2, newReview]);
+            return createdReview;
         });
     }
     update(id, review) {
@@ -1541,10 +1631,7 @@ let ReviewService = class ReviewService {
                     }],
                 new: true,
             });
-            yield Promise.all([updatedReview.save(), updatedReview2.save(), updatedReview3.save()]);
-            if (!updatedReview) {
-                throw new common_1.NotFoundException(`Review with id ${id} not found`);
-            }
+            yield Promise.all([updatedReview, updatedReview2, updatedReview3]);
             return updatedReview;
         });
     }

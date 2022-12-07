@@ -35,15 +35,21 @@ export class Order {
   total: number;
 
   @Prop({
-    required: false,
-    unique: false,
-  })
-  productPrice: number;
-
-  @Prop({
     required: true,
   })
   deliveryDate: Date;
+
+  @Prop({
+    required: false,
+    unique: false,
+  })
+  productImage: string;
+
+  @Prop({
+    required: false,
+    unique: false,
+  })
+  productName: string;
 
 
 

@@ -1,5 +1,5 @@
 
-import {Body, Controller, Get, HttpException, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, HttpException, HttpStatus, Param,Delete , Post} from '@nestjs/common';
 
 
 import {Product, Review, User} from '@find-a-buddy/data';
@@ -24,7 +24,18 @@ export class OrderController {
         }
         catch (e) {
             console.log('error', e);
-            throw new HttpException('Error creating product >' + e, 500);
+            throw new HttpException('Error creating product >' + e, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Delete(':id')
+    async delete(@InjectToken() token: Token,  @Param() orderId: string): Promise<Order> {
+        try {
+            return await this.orderService.delete(orderId, token);
+        }
+        catch (e) {
+            console.log('error', e);
+            throw new HttpException('Error creating product >' + e, HttpStatus.BAD_REQUEST);
         }
     }
 

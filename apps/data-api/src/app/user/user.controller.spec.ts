@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 
 import { UserService } from './user.service';
-import {User} from "@find-a-buddy/data";
+import {Id, User, UserInfo} from "@find-a-buddy/data";
 
 describe('TopicController', () => {
   let app: TestingModule;
@@ -22,57 +22,62 @@ describe('TopicController', () => {
       }],
     }).compile();
 
-   userController = app.get<UserController>(UserController);
-   userService = app.get<UserService>(UserService);
+    userController = app.get<UserController>(UserController);
+    userService = app.get<UserService>(UserService);
   });
 
   describe('getAll', () => {
     it('should call getAll on the service', async () => {
-      const exampleUser = {
-        id: 'id123',
-        username: 'thomas0',
-        wallet: 500,
-        products: [],
-        reviews: [],
-        friends: [],
-      };
 
-      const getAll = jest.spyOn(userService, 'getAll')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .mockImplementation(async () => [exampleUser]);
-
-      const results = await userController.getAll();
-
-      expect(getAll).toBeCalledTimes(1);
-      expect(results).toHaveLength(1);
-      expect(results[0]).toHaveProperty('id', exampleUser.id);
+      const users: User[] = [
+        {
+          id: '1',
+          username: 'test',
+          password: 'test',
+          token: 'test',
+          wallet: 0,
+          products: [],
+          reviews: [],
+          following: [],
+          orders: [],
+        },
+      ];
+      jest.spyOn(userService, 'getAll').mockImplementation(() => Promise.resolve(users));
+      expect(await userController.getAll()).toBe(users);
+      expect(userService.getAll).toHaveBeenCalled();
+      expect(userService.getAll).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('getOne & getSelf', () => {
     it('should call getOne on the service with id from parameter', async () => {
-      const exampleUser = {
-        id: 'id123',
-        name: 'alexander',
-        isActive: true,
-        emailAddress: 'alexander@avans.nl',
+      const user: User = {
+        id: '1',
+        username: 'test',
+        password: 'test',
+        token: 'test',
         wallet: 0,
-        roles: [],
-        meetups: [],
-        tutorTopics: ["nosql"],
-        pupilTopics: ["flying"],
-        rating: 4,
-        reviews: [{id: 'r123', text: 'Great help', rating: 4, pupil: 'id4321', tutor: 'id123', datetime: new Date()}],
+        products: [],
+        reviews: [],
+        following: [],
+        orders: [],
       };
 
-      const getOne = jest.spyOn(userService, 'getOne')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .mockImplementation(async () => exampleUser);
+      const token = {
+        username: 'test',
+        id: '1',
+      }
 
-      const result = await userController.getOne(exampleUser.id);
+      jest.spyOn(userService, 'getOne').mockImplementation(() => Promise.resolve(user));
+      expect(await userController.getOne('1')).toBe(user);
+      expect(userService.getOne).toHaveBeenCalled();
+      expect(userService.getOne).toHaveBeenCalledTimes(1);
+      expect(userService.getOne).toHaveBeenCalledWith('1');
 
-      expect(getOne).toBeCalledTimes(1);
-      expect(result).toHaveProperty('id', exampleUser.id);
+      expect(await userController.getSelf(token)).toBe(user);
+      expect(userService.getOne).toHaveBeenCalled();
+      expect(userService.getOne).toHaveBeenCalledTimes(2);
+      expect(userService.getOne).toHaveBeenCalledWith('1');
     });
   });
 });

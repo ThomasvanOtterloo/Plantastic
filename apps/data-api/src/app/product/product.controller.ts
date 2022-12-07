@@ -1,5 +1,5 @@
 
-import {Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpException,HttpStatus ,Param, Patch, Post, Put} from '@nestjs/common';
 
 
 import { Product, User } from '@find-a-buddy/data';
@@ -39,14 +39,20 @@ export class ProductController {
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: string): Promise<Product> {
-        await this.productService.delete(id);
+    async delete(@InjectToken() token: Token, @Param('id') id: string): Promise<Product> {
+        await this.productService.delete(id, token);
         return null;
     }
 
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() product: Product): Promise<Product> {
-        return this.productService.update(id, product);
+    async update(@InjectToken() token: Token, @Param('id') id: string, @Body() product: Product): Promise<Product> {
+        try {
+            return await this.productService.update(id, product, token);
+        }
+        catch (e) {
+            console.log('error', e);
+            throw new HttpException('Error updating product >' + e, HttpStatus.BAD_REQUEST);
+        }
     }
 
 

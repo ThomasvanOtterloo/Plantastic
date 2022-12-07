@@ -38,15 +38,16 @@ export class ReviewService {
                 rating: {$first: '$rating'},
             }
         }
-
-
-
-
-
     ]);
   }
 
   async delete(token: Token , id: string){
+
+      const findUserWithReview = await this.userModel.findOne
+        ({id: token.id, reviews: {$elemMatch: {id: id}}});
+        if (!findUserWithReview) {
+            throw new Error(`Review with id ${id} not found`);
+        }
 
 
       await Promise.all([
@@ -82,23 +83,32 @@ export class ReviewService {
     return products[0];
   }
 
-  async create(review: Review, author: Token, productId: string): Promise<Review> {
+  async create(review: Review, author: Token, productId: string): Promise<User> {
     console.log(review);
       review.authorId = author.id;
       review.author = author.username;
       review.productId = productId;
+
+      if (review.rating > 10 || review.rating < 0 || review.rating % 1 !== 0) {
+            throw new NotFoundException(`Rating must be between 0 and 10`);
+      }
+      if (review.description === '') {
+            throw new NotFoundException(`Description must not be empty`);
+      }
+
         const newReview = new this.reviewModel({
             ...review,
         });
     const createdReview = await this.userModel.findOneAndUpdate({ id: author.id }, { $push: { reviews: newReview } });
     const createdReview2 = await this.productModel.findOneAndUpdate({ id: productId }, { $push: { reviews: newReview } });
 
-    await Promise.all([createdReview.save(), createdReview2.save(), newReview.save()]);
+    await Promise.all([createdReview, createdReview2, newReview]);
 
-    return this.reviewModel.findOne({ id: review.id });
+    return createdReview
   }
 
     async update(id: string, review: Review): Promise<Review> {
+
       const updatedReview = await this.reviewModel.findOneAndUpdate({
             id: id,
         }, {
@@ -135,11 +145,7 @@ export class ReviewService {
             new: true,
         });
 
-        await Promise.all([updatedReview.save(), updatedReview2.save(), updatedReview3.save()]);
-
-        if (!updatedReview) {
-            throw new NotFoundException(`Review with id ${id} not found`);
-        }
+        await Promise.all([updatedReview, updatedReview2, updatedReview3]);
 
         return updatedReview;
     }
