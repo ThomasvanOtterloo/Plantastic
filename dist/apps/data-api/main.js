@@ -1179,6 +1179,21 @@ let ProductService = class ProductService {
             if (!author) {
                 throw new Error('AuthorId not found');
             }
+            if (product.price < 1) {
+                throw new Error('Price must be greater than 1');
+            }
+            if (product.quantity < 2) {
+                throw new Error('Quantity must be greater than 2');
+            }
+            if (product.category.length < 1) {
+                throw new Error('Category must be greater than 1');
+            }
+            if (product.name.length < 1) {
+                throw new Error('Name must be greater than 1');
+            }
+            if (product.description.length < 1) {
+                throw new Error('Description must be greater than 1');
+            }
             console.log('author works', author);
             const newProduct = new this.productModel({
                 author: author.username,

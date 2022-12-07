@@ -35,7 +35,7 @@ export class FollowController {
 
 
     @Delete(':id')
-    async Unfollow(@InjectToken() token: Token, @Param('id') username: string): Promise<Follow> {
+    async Unfollow(@InjectToken() token: Token, @Param('id') username: string): Promise<Follow[]> {
         try {
             return this.followService.Unfollow(token.id, username);
         }

@@ -55,7 +55,7 @@ export class FollowService {
       }
 
 
-    async Unfollow(userId: string, followingUsername: string): Promise<Follow> {
+    async Unfollow(userId: string, followingUsername: string): Promise<Follow[]> {
         const findFollowingUser = await this.userModel.aggregate(
             [
                 {
@@ -92,8 +92,11 @@ export class FollowService {
                     username: {$first: '$username'},
                     following: {$first: '$following'},
                 }
-            }]);
+            }
+            ]);
     }
+
+
 
 
     async GetAllFollowers(userId: string): Promise<Follow[]> {
@@ -112,6 +115,5 @@ export class FollowService {
                     following: {$first: '$following'},
                 }
             }]);
-
     }
 }
