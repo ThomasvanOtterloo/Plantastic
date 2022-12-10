@@ -10,6 +10,9 @@ import { MongoClient } from 'mongodb';
 import { AuthService } from './auth.service';
 import { Identity, IdentitySchema } from './identity.schema';
 import { User, UserSchema } from '../user/user.schema';
+import {Neo4jService} from "../neo4j/neo4j.service";
+import {Neo4jModule} from "../neo4j/neo4j.module";
+import * as process from "process";
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -28,10 +31,20 @@ describe('AuthService', () => {
             return {uri};
           },
         }),
+        Neo4jModule.forRoot({
+          scheme: 'neo4j',
+          host: 'localhost',
+          username: 'thomas',
+          password: process.env.NEO4J_PASSWORD,
+          database: 'neo4j'
+        }),
         MongooseModule.forFeature([{ name: Identity.name, schema: IdentitySchema }]),
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       ],
-      providers: [AuthService],
+      providers: [AuthService, Neo4jService],
+
+
+
     }).compile();
 
     service = app.get<AuthService>(AuthService);

@@ -86,9 +86,21 @@ export class FollowUserService {
         }
         return of(undefined);
     }
+
+    public getFollowersInterests(): Observable<Product[]> {
+        return this.http.get<FollowersProductsBody>(`follow/interests`, {})
+            .pipe(
+                catchError((error: HttpErrorResponse) => this.handleError(error)),
+                map((body: FollowersProductsBody) => body.results),
+            );
+    }
 }
 
 export interface FollowersBody {
     results: Array<User>
+}
+
+export interface FollowersProductsBody {
+    results: Array<Product>
 }
 

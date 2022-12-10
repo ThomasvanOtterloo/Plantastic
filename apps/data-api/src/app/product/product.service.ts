@@ -7,13 +7,15 @@ import {Product as ProductModel, ProductDocument} from './product.schema';
 import {Category, Id, Product, Review} from '@find-a-buddy/data';
 import {User, UserDocument} from "../user/user.schema";
 import {Token} from "../auth/token.decorator";
+import {Neo4jService} from "../neo4j/neo4j.service";
 
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(ProductModel.name) private productModel: Model<ProductDocument>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly neo4jService: Neo4jService
   ) {}
 
   async getAll(): Promise<Product[]> {
@@ -61,9 +63,15 @@ export class ProductService {
       if (product.authorId !== token.id) {
             throw new Error('You are not allowed to delete this product');
       }
-
-
     await this.productModel.deleteOne({ id: productId });
+
+      const deleteProductNeo4j = await this.neo4jService.singleWrite(
+            `MATCH (p:Product {id: $id}) DETACH DELETE p`,
+            {
+                id: productId,
+            }
+        );
+
     await this.userModel.updateMany(
         {},
         {
@@ -135,10 +143,6 @@ export class ProductService {
           throw new Error('Description must be greater than 1');
       }
 
-
-
-    console.log('author works', author);
-
     const newProduct = new this.productModel({
         author: author.username,
         authorId: author.id,
@@ -168,7 +172,21 @@ export class ProductService {
         { new: true }
     );
 
+      const AddProductWithUser = await this.neo4jService.singleWrite(
+           'MATCH (u:User {id: $userId}) CREATE (p:Product {id: $productId, name: $productName, description: $productDescription, image: $productImage, quantity: $productQuantity, price: $productPrice, category: $productCategory}) CREATE (u)-[:SOLD_BY]->(p)',
+            {
+                userId: author.id,
+                productId: newProduct.id,
+                productName: newProduct.name,
+                productDescription: newProduct.description,
+                productImage: newProduct.image,
+                productQuantity: newProduct.quantity,
+                productPrice: newProduct.price,
+                productCategory: newProduct.category,
+            }
+        );
 
+      console.log('createProductNeo4j', AddProductWithUser);
 
     await Promise.all([newProduct.save(), addProductToUser.save()]);
 
@@ -192,13 +210,25 @@ export class ProductService {
             throw new Error('Name must be greater than 1 character');
         }
 
-
         const updatedProduct = await this.productModel.findOneAndUpdate(
             { id: productId },
             {
                 ...product,
             },
             { new: true }
+        );
+
+        const updateProductNeo4j = await this.neo4jService.singleWrite(
+            `MATCH (p:Product {id: $id}) SET p.name = $name, p.description = $description, p.image = $image, p.quantity = $quantity, p.price = $price, p.category = $category`,
+            {
+                id: productId,
+                name: product.name,
+                description: product.description,
+                image: product.image,
+                quantity: product.quantity,
+                price: product.price,
+                category: product.category,
+            }
         );
 
         const updatedAuthor = await this.userModel.findOneAndUpdate(
@@ -221,8 +251,4 @@ export class ProductService {
             });
     return updatedProduct;
     }
-
-
-
-
 }

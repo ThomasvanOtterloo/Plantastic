@@ -7,6 +7,7 @@ import {User, UserDocument} from "../user/user.schema";
 import {Product, ProductDocument} from "../product/product.schema";
 import {Order, OrderDocument} from "./order.schema";
 import {Token} from "../auth/token.decorator";
+import {Neo4jService} from "../neo4j/neo4j.service";
 
 
 @Injectable()
@@ -14,7 +15,8 @@ export class OrderService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-    @InjectModel(Order.name) private orderModel: Model<OrderDocument>
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    private readonly neo4jService: Neo4jService
   ) {}
 
   async getAll(token : string): Promise<Order[]> {
@@ -80,8 +82,6 @@ export class OrderService {
             deliveryDate: new Date().setDate( new Date().getDate() + 7 ),
         });
 
-        console.log('newOrder', newOrder.deliveryDate.toLocaleString());
-
         author.orders.push(newOrder);
 
         const updateUser = await this.userModel.findOneAndUpdate(
@@ -98,6 +98,25 @@ export class OrderService {
                 quantity: product.quantity - order.quantity,
             } },
         );
+
+        console.log(newOrder)
+
+
+        const userOrdersProduct = await this.neo4jService.singleWrite(
+            `MATCH (u:User {id: $authorId})
+            MATCH (p:Product {id: $productId})
+            CREATE (u)-[:ORDERED]->(p)
+            RETURN u, p`,
+            {
+                authorId: token.id,
+                productId: order.productId,
+            },
+        );
+
+
+
+        console.log(userOrdersProduct)
+
 
         await Promise.all([updateUser, updateProduct]);
         return newOrder.save();

@@ -45,4 +45,15 @@ export class FollowController {
         }
     }
 
+    @Get('interests')
+    async getFollowersInterests(@InjectToken() token: Token): Promise<Follow[]> {
+        try {
+            return this.followService.getFollowersInterests(token.id);
+        }
+        catch (e) {
+            console.log('DIDNT WORK', e);
+            throw new HttpException('Error deleting followed user >' + e, 500);
+        }
+    }
+
 }

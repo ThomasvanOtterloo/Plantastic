@@ -60,9 +60,12 @@ const mongoose_1 = __webpack_require__("@nestjs/mongoose");
 const auth_module_1 = __webpack_require__("./apps/data-api/src/app/auth/auth.module.ts");
 const token_middleware_1 = __webpack_require__("./apps/data-api/src/app/auth/token.middleware.ts");
 const data_module_1 = __webpack_require__("./apps/data-api/src/app/data.module.ts");
+const neo4j_module_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.module.ts");
+const rmcd_module_1 = __webpack_require__("./apps/data-api/src/app/rmcd.module.ts");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(token_middleware_1.TokenMiddleware).forRoutes('data-api');
+        consumer.apply(token_middleware_1.TokenMiddleware).forRoutes('rcmd-api');
     }
 };
 AppModule = tslib_1.__decorate([
@@ -71,8 +74,16 @@ AppModule = tslib_1.__decorate([
             mongoose_1.MongooseModule.forRoot(
             // `mongodb+srv://${process.env.MONGO_USR}:${process.env.MONGO_PWD}@${process.env.MONGO_HOST}/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`
             `mongodb://${process.env.MONGO_HOST}/${process.env.MONGO_DATABASE}`),
+            neo4j_module_1.Neo4jModule.forRoot({
+                scheme: 'neo4j+s',
+                host: process.env.NEO4J_HOST,
+                username: process.env.NEO4J_USR,
+                password: process.env.NEO4J_PWD,
+                database: process.env.NEO4J_DATABASE,
+            }),
             auth_module_1.AuthModule,
             data_module_1.DataModule,
+            rmcd_module_1.RcmdModule,
             core_1.RouterModule.register([
                 {
                     path: 'auth-api',
@@ -81,6 +92,10 @@ AppModule = tslib_1.__decorate([
                 {
                     path: 'data-api',
                     module: data_module_1.DataModule,
+                },
+                {
+                    path: 'rcmd-api',
+                    module: rmcd_module_1.RcmdModule,
                 },
             ]),
         ],
@@ -195,7 +210,7 @@ exports.AuthModule = AuthModule;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -206,15 +221,21 @@ const mongoose_1 = __webpack_require__("mongoose");
 const mongoose_2 = __webpack_require__("@nestjs/mongoose");
 const identity_schema_1 = __webpack_require__("./apps/data-api/src/app/auth/identity.schema.ts");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
+const neo4j_service_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.service.ts");
 let AuthService = class AuthService {
-    constructor(identityModel, userModel) {
+    constructor(identityModel, userModel, neo4jService) {
         this.identityModel = identityModel;
         this.userModel = userModel;
+        this.neo4jService = neo4jService;
     }
     createUser(username) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = new this.userModel({ username });
             yield user.save();
+            console.log('trying to create user:');
+            const result = yield this.neo4jService.singleWrite('CREATE (u:User {id: $id, username: $username}) RETURN u', { id: user.id, username: user.username });
+            console.log('created user:');
+            console.log(result);
             return user.id;
         });
     }
@@ -260,7 +281,7 @@ AuthService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, mongoose_2.InjectModel)(identity_schema_1.Identity.name)),
     tslib_1.__param(1, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object])
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object, typeof (_c = typeof neo4j_service_1.Neo4jService !== "undefined" && neo4j_service_1.Neo4jService) === "function" ? _c : Object])
 ], AuthService);
 exports.AuthService = AuthService;
 /*
@@ -422,7 +443,7 @@ exports.DataModule = DataModule;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FollowController = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -469,6 +490,17 @@ let FollowController = class FollowController {
             }
         });
     }
+    getFollowersInterests(token) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                return this.followService.getFollowersInterests(token.id);
+            }
+            catch (e) {
+                console.log('DIDNT WORK', e);
+                throw new common_1.HttpException('Error deleting followed user >' + e, 500);
+            }
+        });
+    }
 };
 tslib_1.__decorate([
     (0, common_1.Get)(),
@@ -493,6 +525,13 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _g : Object, String]),
     tslib_1.__metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], FollowController.prototype, "Unfollow", null);
+tslib_1.__decorate([
+    (0, common_1.Get)('interests'),
+    tslib_1.__param(0, (0, token_decorator_1.InjectToken)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_j = typeof token_decorator_1.Token !== "undefined" && token_decorator_1.Token) === "function" ? _j : Object]),
+    tslib_1.__metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], FollowController.prototype, "getFollowersInterests", null);
 FollowController = tslib_1.__decorate([
     (0, common_1.Controller)('follow'),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof follow_service_1.FollowService !== "undefined" && follow_service_1.FollowService) === "function" ? _a : Object])
@@ -544,7 +583,7 @@ exports.FollowSchema = mongoose_1.SchemaFactory.createForClass(Follow);
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FollowService = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -553,10 +592,12 @@ const mongoose_1 = __webpack_require__("mongoose");
 const mongoose_2 = __webpack_require__("@nestjs/mongoose");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
 const follow_schema_1 = __webpack_require__("./apps/data-api/src/app/friend/follow.schema.ts");
+const neo4j_service_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.service.ts");
 let FollowService = class FollowService {
-    constructor(userModel, followModel) {
+    constructor(userModel, followModel, neo4jService) {
         this.userModel = userModel;
         this.followModel = followModel;
+        this.neo4jService = neo4jService;
     }
     Follow(tokenId, username) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -578,6 +619,11 @@ let FollowService = class FollowService {
             yield Promise.all([
                 yield this.userModel.updateOne({ id: tokenId }, { $push: { following: findFollowingUser } })
             ]);
+            const findFollowingId = yield this.userModel.findOne({
+                username: username
+            });
+            const followUser = yield this.neo4jService.singleWrite('MATCH (u:User {id: $id}), (f:User {id: $followingId}) MERGE (u)-[r:FOLLOWS]->(f) RETURN u, r, f', { id: tokenId, followingId: findFollowingId.id });
+            console.log('follwing user neo: ', followUser);
             return this.userModel.aggregate([
                 {
                     $match: {
@@ -612,9 +658,12 @@ let FollowService = class FollowService {
                     }
                 }
             ]);
+            const getFollowingUser = yield this.userModel.findOne({ username: followingUsername });
             yield Promise.all([
                 yield this.userModel.updateOne({ id: userId }, { $pull: { following: findFollowingUser } })
             ]);
+            const unfollowUser = yield this.neo4jService.singleWrite('MATCH (u:User {id: $id})-[r:FOLLOWS]->(f:User {id: $followingId}) DELETE r', { id: userId, followingId: getFollowingUser.id });
+            console.log('unfollow user neo: ', unfollowUser);
             return yield this.userModel.aggregate([
                 {
                     $match: {
@@ -651,14 +700,211 @@ let FollowService = class FollowService {
             ]);
         });
     }
+    getFollowersInterests(userId) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const getListOfFollowersInterests = yield this.neo4jService.singleRead('MATCH (u:User {id: $id})-[r:FOLLOWS]->(f:User)-[:SOLD_BY|:ORDERED]->(p:Product) RETURN p', { id: userId });
+            const getResultOfInterests = getListOfFollowersInterests.records.map((record) => {
+                return record.get('p').properties;
+            });
+            console.log('getListOfFollowersOrders: ', getResultOfInterests);
+            return getResultOfInterests;
+        });
+    }
 };
 FollowService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
     tslib_1.__param(1, (0, mongoose_2.InjectModel)(follow_schema_1.Follow.name)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object])
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object, typeof (_c = typeof neo4j_service_1.Neo4jService !== "undefined" && neo4j_service_1.Neo4jService) === "function" ? _c : Object])
 ], FollowService);
 exports.FollowService = FollowService;
+
+
+/***/ }),
+
+/***/ "./apps/data-api/src/app/neo4j/neo4j-config.interface.ts":
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
+/***/ "./apps/data-api/src/app/neo4j/neo4j.constants.ts":
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NEO4J_DRIVER = exports.NEO4J_CONFIG = void 0;
+exports.NEO4J_CONFIG = 'NEO4J_CONFIG';
+exports.NEO4J_DRIVER = 'NEO4J_DRIVER';
+
+
+/***/ }),
+
+/***/ "./apps/data-api/src/app/neo4j/neo4j.module.ts":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+// based on: https://github.com/adam-cowley/twitch-project
+// also see: https://medium.com/neo4j/building-a-modern-web-application-with-neo4j-and-nestjs-b51ffd8268fa
+var Neo4jModule_1;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Neo4jModule = void 0;
+const tslib_1 = __webpack_require__("tslib");
+const common_1 = __webpack_require__("@nestjs/common");
+const neo4j_service_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.service.ts");
+const neo4j_constants_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.constants.ts");
+const neo4j_util_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.util.ts");
+let Neo4jModule = Neo4jModule_1 = class Neo4jModule {
+    static forRoot(config) {
+        return {
+            module: Neo4jModule_1,
+            global: true,
+            providers: [
+                {
+                    provide: neo4j_constants_1.NEO4J_CONFIG,
+                    useValue: config,
+                },
+                {
+                    provide: neo4j_constants_1.NEO4J_DRIVER,
+                    inject: [neo4j_constants_1.NEO4J_CONFIG],
+                    useFactory: (config) => tslib_1.__awaiter(this, void 0, void 0, function* () { return (0, neo4j_util_1.createDriver)(config); }),
+                },
+                neo4j_service_1.Neo4jService,
+            ],
+            exports: [
+                neo4j_service_1.Neo4jService,
+            ]
+        };
+    }
+    static forMock() {
+    }
+};
+Neo4jModule = Neo4jModule_1 = tslib_1.__decorate([
+    (0, common_1.Module)({})
+], Neo4jModule);
+exports.Neo4jModule = Neo4jModule;
+
+
+/***/ }),
+
+/***/ "./apps/data-api/src/app/neo4j/neo4j.service.ts":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Neo4jService = void 0;
+const tslib_1 = __webpack_require__("tslib");
+const neo4j_driver_1 = tslib_1.__importStar(__webpack_require__("neo4j-driver"));
+const common_1 = __webpack_require__("@nestjs/common");
+const neo4j_config_interface_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j-config.interface.ts");
+const neo4j_constants_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.constants.ts");
+function getMode(mode) {
+    return mode == 'read' ? neo4j_driver_1.default.session.READ : neo4j_driver_1.default.session.WRITE;
+}
+let Neo4jService = class Neo4jService {
+    constructor(config, driver) {
+        this.config = config;
+        this.driver = driver;
+    }
+    getSession(mode) {
+        return this.driver.session({
+            database: this.config.database,
+            defaultAccessMode: mode,
+        });
+    }
+    executeSingle(mode, query, params) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const session = this.getSession(mode);
+            const result = yield session.run(query, params);
+            session.close();
+            return result;
+        });
+    }
+    executeTransaction(mode, transactionWork) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const session = this.getSession(neo4j_driver_1.default.session.READ);
+            let result;
+            if (mode === neo4j_driver_1.default.session.READ) {
+                result = yield session.executeRead(transactionWork);
+            }
+            else {
+                result = yield session.executeWrite(transactionWork);
+            }
+            session.close();
+            return result;
+        });
+    }
+    getConfig() {
+        return this.config;
+    }
+    // use these two for access to neo4j result object when running one query
+    singleRead(query, params) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.executeSingle(neo4j_driver_1.default.session.READ, query, params);
+        });
+    }
+    singleWrite(query, params) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.executeSingle(neo4j_driver_1.default.session.WRITE, query, params);
+        });
+    }
+    // use these two for access to neo4j result object when running transactions
+    readTransaction(transactionWork) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.executeTransaction(neo4j_driver_1.default.session.READ, transactionWork);
+        });
+    }
+    writeTransaction(transactionWork) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return this.executeTransaction(neo4j_driver_1.default.session.READ, transactionWork);
+        });
+    }
+    // here the neo4j driver is abstracted away from the outside
+    // TODO handle 64 bit integers
+    // TODO clean returned object to match our own Node and Relation type?
+    // TODO how to handle variadic types?
+    run(query, params) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const result = yield this.executeSingle(getMode(query.mode), query.text, params);
+            return result.records.map(r => r.toObject());
+        });
+    }
+    // transaction with neo4j driver abstracted away
+    // TODO
+    onApplicationShutdown() {
+        return this.driver.close();
+    }
+};
+Neo4jService = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__param(0, (0, common_1.Inject)(neo4j_constants_1.NEO4J_CONFIG)),
+    tslib_1.__param(1, (0, common_1.Inject)(neo4j_constants_1.NEO4J_DRIVER)),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof neo4j_config_interface_1.Neo4jConfig !== "undefined" && neo4j_config_interface_1.Neo4jConfig) === "function" ? _a : Object, typeof (_b = typeof neo4j_driver_1.Driver !== "undefined" && neo4j_driver_1.Driver) === "function" ? _b : Object])
+], Neo4jService);
+exports.Neo4jService = Neo4jService;
+
+
+/***/ }),
+
+/***/ "./apps/data-api/src/app/neo4j/neo4j.util.ts":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createDriver = void 0;
+const tslib_1 = __webpack_require__("tslib");
+const neo4j_driver_1 = tslib_1.__importDefault(__webpack_require__("neo4j-driver"));
+const createDriver = (config) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const driver = neo4j_driver_1.default.driver(`bolt://127.0.0.1:7687`, neo4j_driver_1.default.auth.basic(config.username, config.password));
+    console.log(config.host);
+    yield driver.getServerInfo();
+    return driver;
+});
+exports.createDriver = createDriver;
 
 
 /***/ }),
@@ -816,7 +1062,7 @@ exports.OrderSchema = mongoose_1.SchemaFactory.createForClass(Order);
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrderService = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -826,11 +1072,13 @@ const mongoose_2 = __webpack_require__("@nestjs/mongoose");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
 const product_schema_1 = __webpack_require__("./apps/data-api/src/app/product/product.schema.ts");
 const order_schema_1 = __webpack_require__("./apps/data-api/src/app/order/order.schema.ts");
+const neo4j_service_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.service.ts");
 let OrderService = class OrderService {
-    constructor(userModel, productModel, orderModel) {
+    constructor(userModel, productModel, orderModel, neo4jService) {
         this.userModel = userModel;
         this.productModel = productModel;
         this.orderModel = orderModel;
+        this.neo4jService = neo4jService;
     }
     getAll(token) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -896,7 +1144,6 @@ let OrderService = class OrderService {
                     productPrice: product.price,
                     deliveryDate: new Date().setDate(new Date().getDate() + 7),
                 });
-                console.log('newOrder', newOrder.deliveryDate.toLocaleString());
                 author.orders.push(newOrder);
                 const updateUser = yield this.userModel.findOneAndUpdate({ id: token.id }, { $set: {
                         orders: author.orders,
@@ -905,6 +1152,15 @@ let OrderService = class OrderService {
                 const updateProduct = yield this.productModel.findOneAndUpdate({ id: order.productId }, { $set: {
                         quantity: product.quantity - order.quantity,
                     } });
+                console.log(newOrder);
+                const userOrdersProduct = yield this.neo4jService.singleWrite(`MATCH (u:User {id: $authorId})
+            MATCH (p:Product {id: $productId})
+            CREATE (u)-[:ORDERED]->(p)
+            RETURN u, p`, {
+                    authorId: token.id,
+                    productId: order.productId,
+                });
+                console.log(userOrdersProduct);
                 yield Promise.all([updateUser, updateProduct]);
                 return newOrder.save();
             }
@@ -939,7 +1195,7 @@ OrderService = tslib_1.__decorate([
     tslib_1.__param(0, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
     tslib_1.__param(1, (0, mongoose_2.InjectModel)(product_schema_1.Product.name)),
     tslib_1.__param(2, (0, mongoose_2.InjectModel)(order_schema_1.Order.name)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object, typeof (_c = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _c : Object])
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object, typeof (_c = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _c : Object, typeof (_d = typeof neo4j_service_1.Neo4jService !== "undefined" && neo4j_service_1.Neo4jService) === "function" ? _d : Object])
 ], OrderService);
 exports.OrderService = OrderService;
 
@@ -1134,7 +1390,7 @@ exports.ProductSchema = mongoose_1.SchemaFactory.createForClass(Product);
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductService = void 0;
 const tslib_1 = __webpack_require__("tslib");
@@ -1143,10 +1399,12 @@ const mongoose_1 = __webpack_require__("mongoose");
 const mongoose_2 = __webpack_require__("@nestjs/mongoose");
 const product_schema_1 = __webpack_require__("./apps/data-api/src/app/product/product.schema.ts");
 const user_schema_1 = __webpack_require__("./apps/data-api/src/app/user/user.schema.ts");
+const neo4j_service_1 = __webpack_require__("./apps/data-api/src/app/neo4j/neo4j.service.ts");
 let ProductService = class ProductService {
-    constructor(productModel, userModel) {
+    constructor(productModel, userModel, neo4jService) {
         this.productModel = productModel;
         this.userModel = userModel;
+        this.neo4jService = neo4jService;
     }
     getAll() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -1194,6 +1452,9 @@ let ProductService = class ProductService {
                 throw new Error('You are not allowed to delete this product');
             }
             yield this.productModel.deleteOne({ id: productId });
+            const deleteProductNeo4j = yield this.neo4jService.singleWrite(`MATCH (p:Product {id: $id}) DETACH DELETE p`, {
+                id: productId,
+            });
             yield this.userModel.updateMany({}, {
                 $pull: {
                     products: {
@@ -1259,7 +1520,6 @@ let ProductService = class ProductService {
             if (product.description.length < 1) {
                 throw new Error('Description must be greater than 1');
             }
-            console.log('author works', author);
             const newProduct = new this.productModel({
                 author: author.username,
                 authorId: author.id,
@@ -1283,6 +1543,17 @@ let ProductService = class ProductService {
                     },
                 },
             }, { new: true });
+            const AddProductWithUser = yield this.neo4jService.singleWrite('MATCH (u:User {id: $userId}) CREATE (p:Product {id: $productId, name: $productName, description: $productDescription, image: $productImage, quantity: $productQuantity, price: $productPrice, category: $productCategory}) CREATE (u)-[:SOLD_BY]->(p)', {
+                userId: author.id,
+                productId: newProduct.id,
+                productName: newProduct.name,
+                productDescription: newProduct.description,
+                productImage: newProduct.image,
+                productQuantity: newProduct.quantity,
+                productPrice: newProduct.price,
+                productCategory: newProduct.category,
+            });
+            console.log('createProductNeo4j', AddProductWithUser);
             yield Promise.all([newProduct.save(), addProductToUser.save()]);
             return newProduct;
         });
@@ -1305,6 +1576,15 @@ let ProductService = class ProductService {
                 throw new Error('Name must be greater than 1 character');
             }
             const updatedProduct = yield this.productModel.findOneAndUpdate({ id: productId }, Object.assign({}, product), { new: true });
+            const updateProductNeo4j = yield this.neo4jService.singleWrite(`MATCH (p:Product {id: $id}) SET p.name = $name, p.description = $description, p.image = $image, p.quantity = $quantity, p.price = $price, p.category = $category`, {
+                id: productId,
+                name: product.name,
+                description: product.description,
+                image: product.image,
+                quantity: product.quantity,
+                price: product.price,
+                category: product.category,
+            });
             const updatedAuthor = yield this.userModel.findOneAndUpdate({ username: updatedProduct.author }, {
                 $set: {
                     'products.$[elem].name': updatedProduct.name,
@@ -1328,7 +1608,7 @@ ProductService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, mongoose_2.InjectModel)(product_schema_1.Product.name)),
     tslib_1.__param(1, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object])
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_1.Model !== "undefined" && mongoose_1.Model) === "function" ? _b : Object, typeof (_c = typeof neo4j_service_1.Neo4jService !== "undefined" && neo4j_service_1.Neo4jService) === "function" ? _c : Object])
 ], ProductService);
 exports.ProductService = ProductService;
 
@@ -1651,6 +1931,28 @@ exports.ReviewService = ReviewService;
 
 /***/ }),
 
+/***/ "./apps/data-api/src/app/rmcd.module.ts":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RcmdModule = void 0;
+const tslib_1 = __webpack_require__("tslib");
+const common_1 = __webpack_require__("@nestjs/common");
+let RcmdModule = class RcmdModule {
+};
+RcmdModule = tslib_1.__decorate([
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [],
+        providers: [],
+    })
+], RcmdModule);
+exports.RcmdModule = RcmdModule;
+
+
+/***/ }),
+
 /***/ "./apps/data-api/src/app/user/user.controller.ts":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -1969,6 +2271,13 @@ module.exports = require("jsonwebtoken");
 /***/ ((module) => {
 
 module.exports = require("mongoose");
+
+/***/ }),
+
+/***/ "neo4j-driver":
+/***/ ((module) => {
+
+module.exports = require("neo4j-driver");
 
 /***/ }),
 

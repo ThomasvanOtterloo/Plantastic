@@ -9,17 +9,30 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Identity, IdentityDocument } from './identity.schema';
 import { User, UserDocument } from '../user/user.schema';
 import {UserInfo} from "@find-a-buddy/data";
+import {Neo4jService} from "../neo4j/neo4j.service";
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(Identity.name) private identityModel: Model<IdentityDocument>,
-        @InjectModel(User.name) private userModel: Model<UserDocument>
+        @InjectModel(User.name) private userModel: Model<UserDocument>,
+        private readonly neo4jService: Neo4jService
     ) {}
 
     async createUser(username: string): Promise<string> {
         const user = new this.userModel({username});
         await user.save();
+
+        console.log('trying to create user:');
+
+        const result = await this.neo4jService.singleWrite(
+            'CREATE (u:User {id: $id, username: $username}) RETURN u',
+            {id: user.id, username: user.username}
+        );
+
+        console.log('created user:');
+        console.log(result);
+
         return user.id;
       }
 

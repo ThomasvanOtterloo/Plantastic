@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {FollowUserService} from "./followUser.service";
+import {FollowUserService} from "../products/followUser.service";
 import {User} from "@find-a-buddy/data";
 
 @Component({

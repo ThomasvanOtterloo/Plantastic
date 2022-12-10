@@ -83,6 +83,8 @@ export class ProductService {
         return this.http.patch(`product/${product.id}`, product);
     }
 
+    // @Output() searchEvent = new EventEmitter<string>();
+
 
     public handleError(error: HttpErrorResponse): Observable<any> {
         if (error.status === 401) {
@@ -93,6 +95,7 @@ export class ProductService {
         }
         return of(undefined);
     }
+
 
 
 
