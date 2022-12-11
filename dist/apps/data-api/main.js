@@ -1096,6 +1096,8 @@ let OrderService = class OrderService {
                         quantity: { $first: '$quantity' },
                         total: { $first: '$total' },
                         deliveryDate: { $first: '$deliveryDate' },
+                        productImage: { $first: '$productImage' },
+                        productName: { $first: '$productName' },
                     }
                 },
                 {
@@ -1143,6 +1145,8 @@ let OrderService = class OrderService {
                     total: order.quantity * product.price,
                     productPrice: product.price,
                     deliveryDate: new Date().setDate(new Date().getDate() + 7),
+                    productImage: product.image,
+                    productName: product.name,
                 });
                 author.orders.push(newOrder);
                 const updateUser = yield this.userModel.findOneAndUpdate({ id: token.id }, { $set: {
@@ -1152,7 +1156,6 @@ let OrderService = class OrderService {
                 const updateProduct = yield this.productModel.findOneAndUpdate({ id: order.productId }, { $set: {
                         quantity: product.quantity - order.quantity,
                     } });
-                console.log(newOrder);
                 const userOrdersProduct = yield this.neo4jService.singleWrite(`MATCH (u:User {id: $authorId})
             MATCH (p:Product {id: $productId})
             CREATE (u)-[:ORDERED]->(p)
@@ -1160,7 +1163,6 @@ let OrderService = class OrderService {
                     authorId: token.id,
                     productId: order.productId,
                 });
-                console.log(userOrdersProduct);
                 yield Promise.all([updateUser, updateProduct]);
                 return newOrder.save();
             }

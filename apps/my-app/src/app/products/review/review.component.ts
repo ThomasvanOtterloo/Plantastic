@@ -10,64 +10,58 @@ import {UserInfo} from "@find-a-buddy/data";
 import {UserService} from "../../authentication/user.service";
 
 @Component({
-  selector: 'app-review',
-  templateUrl: './review.component.html',
-  styleUrls: ['./review.component.css']
+    selector: 'app-review',
+    templateUrl: './review.component.html',
+    styleUrls: ['./review.component.css']
 })
 
 export class ReviewComponent implements OnInit {
-  editMode = false;
-  loggedinUser = 'Thomas';
-  product: Product | undefined;
-  reviewsOfProduct2: Review [] = [];
-  newRating: any;
-  description: any;
+    editMode = false;
+    loggedinUser = 'Thomas';
+    product: Product | undefined;
+    reviewsOfProduct2: Review [] = [];
+    newRating: any;
+    description: any;
+    subscriptionParams!: Subscription;
+    localUser!: UserInfo;
 
-  subscriptionParams!: Subscription;
-  localUser!: UserInfo;
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        public authService: AuthService,
+        private userService: UserService,
+        private _reviewService: ReviewService,
+        private _productService: ProductService
+    ) {}
 
+    @Input() reviewsOfProduct: any [] = [];
+    @Input() productId!: string;
+    @Output() onReviewChange = new EventEmitter<Product[]>();
 
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private userService: UserService,
-    private _reviewService: ReviewService,
-    private _productService: ProductService
-  ) {}
-
-  @Input() reviewsOfProduct: any [] = [];
-  @Input() productId!: string;
-  @Output() onReviewChange = new EventEmitter<Product[]>();
-
-  ngOnInit(): void {
-      const userData = localStorage.getItem('currentuser');
-      if (userData) {
-          const localUser = JSON.parse(userData);
+    ngOnInit(): void {
+        const userData = localStorage.getItem('currentuser');
+        if (userData) {
+            const localUser = JSON.parse(userData);
             this.localUser = localUser;
             console.log('local user', this.localUser);
-      }
+        }
 
-  }
-
-
-
-
-  CreateReview() {
-     let Review : any = {
-      rating: this.newRating,
-      description: this.description,
     }
-    this._reviewService.createReview(Review, this.productId).subscribe(
-        (data) => {
-            console.log(data);
-            this.onChange();
-        })
-  }
+
+    CreateReview() {
+        let Review : any = {
+            rating: this.newRating,
+            description: this.description,
+        }
+        this._reviewService.createReview(Review, this.productId).subscribe(
+            (data) => {
+                console.log(data);
+                this.onChange();
+            })
+    }
 
     saveReview(review: Review) {
-      console.log('save review', review);
+        console.log('save review', review);
         this.editMode = false;
         review.rating = this.newRating;
         this._reviewService.saveReview(review).subscribe(
@@ -78,20 +72,15 @@ export class ReviewComponent implements OnInit {
         );
     }
 
-
-
-
-
-
-  DeleteReview(id?: string) {
-    console.log('Delete Review');
-    this._reviewService.deleteReview(id).subscribe(
-        (data) => {
-            console.log(data);
-            this.onChange();
-        }
-    );
-  }
+    DeleteReview(id?: string) {
+        console.log('Delete Review');
+        this._reviewService.deleteReview(id).subscribe(
+            (data) => {
+                console.log(data);
+                this.onChange();
+            }
+        );
+    }
 
     private onChange() {
         this._productService.getProductById(this.productId).subscribe(
@@ -106,6 +95,4 @@ export class ReviewComponent implements OnInit {
         const newdate = new Date(date);
         return newdate.toLocaleString('en-us',{month:'short', year:'numeric', day:'numeric'})
     }
-
-
 }

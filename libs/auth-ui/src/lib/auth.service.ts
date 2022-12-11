@@ -148,7 +148,6 @@ export class AuthService {
   }
 
   userMayEdit(itemUserId: string): Observable<boolean> {
-    console.log('userMayEdit');
     return this.currentUser$.pipe(
       map((user: UserInfo | undefined) =>
         user ? user.id === itemUserId : false

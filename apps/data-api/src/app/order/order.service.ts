@@ -20,7 +20,6 @@ export class OrderService {
   ) {}
 
   async getAll(token : string): Promise<Order[]> {
-
     return this.orderModel.aggregate([{
         $match: {
             authorId: token,
@@ -34,7 +33,8 @@ export class OrderService {
                 quantity: {$first: '$quantity'},
                 total: {$first: '$total'},
                 deliveryDate: {$first: '$deliveryDate'},
-
+                productImage: {$first: '$productImage'},
+                productName: {$first: '$productName'},
             }
         },
         {
@@ -80,8 +80,9 @@ export class OrderService {
             total: order.quantity * product.price,
             productPrice: product.price,
             deliveryDate: new Date().setDate( new Date().getDate() + 7 ),
+            productImage: product.image,
+            productName: product.name,
         });
-
         author.orders.push(newOrder);
 
         const updateUser = await this.userModel.findOneAndUpdate(
@@ -98,10 +99,6 @@ export class OrderService {
                 quantity: product.quantity - order.quantity,
             } },
         );
-
-        console.log(newOrder)
-
-
         const userOrdersProduct = await this.neo4jService.singleWrite(
             `MATCH (u:User {id: $authorId})
             MATCH (p:Product {id: $productId})
@@ -112,11 +109,6 @@ export class OrderService {
                 productId: order.productId,
             },
         );
-
-
-
-        console.log(userOrdersProduct)
-
 
         await Promise.all([updateUser, updateProduct]);
         return newOrder.save();
@@ -155,6 +147,4 @@ export class OrderService {
             throw new Error('You can not delete this order');
         }
     }
-
-
 }

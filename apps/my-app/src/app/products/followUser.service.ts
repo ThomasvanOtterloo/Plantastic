@@ -68,6 +68,7 @@ export class FollowUserService {
     followUser(userId?: string): Observable<Array<User>> {
         return this.http.post<FollowersBody>(`follow`, {username: userId}).pipe(
             map((body: FollowersBody) => body.results),
+            map((users: User[]) => users.map((user: User) => user.following)),
             catchError((error: HttpErrorResponse) => this.handleError(error))
         );
     }

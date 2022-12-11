@@ -61,16 +61,12 @@
           <div class="row">
             <div class="input-field col-12" style="padding: 15px 0px 15px 0px;">
               <label class="inp" for="inp" style="max-width: 70%;">
-                <input placeholder="" id="inp" type="text" [(ngModel)]="product.description" #description="ngModel"
-                min="10" required>
+                <input placeholder="" id="inp" type="text" [(ngModel)]="product.description" #description="ngModel" required>
                 <span class="label">Description</span>
                 <span class="focus-bg"></span>
               </label>
 
               <div *ngIf="description.invalid && (description.dirty || description.touched)" class="alert">
-                <div *ngIf="description.errors?.['min']">
-                  Desciption must have greater than 10 characters.
-                </div>
                 <div *ngIf="description.errors?.['required']">
                   Please enter a description.
                 </div>

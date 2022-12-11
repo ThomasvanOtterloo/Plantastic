@@ -9,26 +9,49 @@
 
           <div class="input-field col-4">
             <label class="inp" for="name">
-              <input id="name" type="text" [(ngModel)]="product.name" minlength="1">
+              <input id="name" type="text" [(ngModel)]="product.name" #name="ngModel" minlength="1" required>
               <span class="label">Name of plant</span>
               <span class="focus-bg"></span>
             </label>
+            <div *ngIf="name.invalid && (name.dirty || name.touched)" class="alert">
+              <div *ngIf="name.errors?.['required']">
+                Name of the plant is required.
+              </div>
+            </div>
           </div>
 
           <div class="input-field col-2">
             <label class="inp" for="inp">
-              <input placeholder="" id="inp" type="number" [(ngModel)]="product.price">
+              <input placeholder="" id="inp" type="number" [(ngModel)]="product.price" #price="ngModel" min="2" required>
               <span class="label">Price</span>
               <span class="focus-bg"></span>
             </label>
+
+            <div *ngIf="price.invalid && (price.dirty || price.touched)" class="alert">
+              <div *ngIf="price.errors?.['min']">
+                price must be greater than 2.
+              </div>
+              <div *ngIf="price.errors?.['required']">
+                Please enter a reasonable price.
+              </div>
+            </div>
           </div>
 
           <div class="input-field col-2">
             <label class="inp" for="inp">
-              <input placeholder="" id="inp" type="number" [(ngModel)]="product.quantity">
+              <input placeholder="" id="inp" type="number" [(ngModel)]="product.quantity" #quantity="ngModel" required min="3">
               <span class="label">Quantity</span>
               <span class="focus-bg"></span>
             </label>
+
+            <div *ngIf="quantity.invalid && (quantity.dirty || quantity.touched)" class="alert">
+              <div *ngIf="quantity.errors?.['min']">
+                Quantity must be greater than 2.
+              </div>
+              <div *ngIf="quantity.errors?.['required']">
+                Please enter the amount of items you have to sell.
+              </div>
+            </div>
           </div>
 
           <div class="input-field col-4">
@@ -38,10 +61,18 @@
           <div class="row">
             <div class="input-field col-12" style="padding: 15px 0px 15px 0px;">
               <label class="inp" for="inp" style="max-width: 70%;">
-                <input placeholder="" id="inp" type="text" [(ngModel)]="product.description">
+                <input placeholder="" id="inp" type="text"
+                       [(ngModel)]="product.description"
+                       #description="ngModel" required>
                 <span class="label">Description</span>
                 <span class="focus-bg"></span>
               </label>
+
+              <div *ngIf="description.invalid && (description.dirty || description.touched)" class="alert">
+                <div *ngIf="description.errors?.['required']">
+                  Please enter a description.
+                </div>
+              </div>
 
             </div>
 
@@ -51,6 +82,11 @@
                 <span class="label">image link</span>
                 <span class="focus-bg"></span>
               </label>
+
+              <div>
+                <i style="color: grey">*When image link kept empty, a default 2D image wil show.</i>
+              </div>
+
             </div>
           </div>
         </div>

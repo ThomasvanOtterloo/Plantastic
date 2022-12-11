@@ -1,4 +1,6 @@
 <div class="author" style="text-align: end; padding-right: 8px">
     <h3 style="color: blue"> @{{authorName}}</h3>
-    <button class="btn btn-primary" (click)="followUser()">{{followState}}</button>
+    <div *ngIf="userId !== productAuthorId">
+        <button class="btn btn-primary" (click)="followUser()">{{followState}}</button>
+    </div>
 </div>

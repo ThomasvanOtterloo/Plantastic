@@ -1,41 +1,30 @@
 <div class="row gy-4" data-aos="fade-up" data-aos-delay="100">
     <div class="col-lg-4 col-md-6" *ngFor="let item of (orders)">
             <div class="service-item  position-relative">
-                <a routerLink="{{ item.productId }}"
+                <a routerLink="/sellers/{{item.productId}}"
                    routerLinkActive="active"
                    ariaCurrentWhenActive="page">
 
-                    <img class="card-image" [src]="item.product.image" alt="image"/>
+                    <img class="card-image" [src]="item.productImage" alt="image"/>
 
                     <div class="card-content">
-                        <p>{{item.total | currency:'EUR':true }}</p>
-                        <p>{{item.product.name}}</p>
-                        <p>{{item.deliveryDate | date}}</p>
-<!--                        <div class="row">-->
-<!--                            <div class="col-5">-->
-<!--                                <div class="icon">-->
-<!--                                    <h3 class="card-title">{{item.product.name}}</h3>-->
-<!--                                </div>-->
-<!--                            </div>-->
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="icon">
+                                    <h3 class="card-title">{{item.productName}}</h3>
+                                </div>
+                            </div>
 
-<!--                            <div class="col-5 " *ngIf="item.category.length == 1">-->
-<!--                                <div class="icon">-->
-<!--                                    <i style="right: 3px;">{{item.category[0]}}</i>-->
-<!--                                </div>-->
-<!--                            </div>-->
+                            <div class="col-2 text-end">
+                                <div class="icon">
+                                    <i style="right: 3px;">{{item.total | currency:'EUR':true  }}</i>
+                                </div>
+                            </div>
 
-<!--                            <div class="col-5 " *ngIf="item.category.length > 1">-->
-<!--                                <div class="icon">-->
-<!--                                    <i style="right: 3px;">{{item.category[0]}} + ...</i>-->
-<!--                                </div>-->
-<!--                            </div>-->
-
-<!--                            <div class="col-2 text-end">-->
-<!--                                <div class="icon">-->
-<!--                                    <i style="right: 3px;">{{item.price | currency:'EUR':true  }}</i>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                            <div class="icon">
+                                <i style="right: 3px;"> Delivered at: {{item.deliveryDate | date }}</i>
+                            </div>
+                        </div>
                     </div>
                 </a>
         </div>
