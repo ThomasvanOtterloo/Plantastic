@@ -3,7 +3,7 @@ import { TokenMiddleware } from './token.middleware';
 describe('Token middelware', () => {
   let middleware, authService;
   let request, response;
-  
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const next = () => {};
 
@@ -18,14 +18,14 @@ describe('Token middelware', () => {
 
   it('should not accept missing authorization header', async () => {
     request.header.mockImplementation(() => "");
-    
+
     await expect(middleware.use(request, response, next)).rejects.toThrow();
   });
 
   it('should not accept invalid token', async () => {
     request.header.mockImplementation(() => "token");
     authService.verifyToken.mockImplementation(() => {throw new Error('token invalid');});
-    
+
     await expect(middleware.use(request, response, next)).rejects.toThrow();
   });
 

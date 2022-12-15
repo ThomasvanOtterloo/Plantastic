@@ -1,103 +1,111 @@
 <div style="padding: 10px">
-  <h2 *ngIf="reviewsOfProduct.length > 0">Reviews:</h2>
-  <h2 *ngIf="reviewsOfProduct.length === 0">Reviews: No reviews of this product yet</h2>
+    <h2 *ngIf="reviewsOfProduct.length > 0">Reviews:</h2>
+    <h2 *ngIf="reviewsOfProduct.length === 0">Reviews: No reviews of this product yet</h2>
 </div>
 
 <div class="review">
-  <div class="row">
-    <div class="review-box">
-
-      <div class="row">
-        <div class="col-4">
-          <div>
-            <h3>Authors username:</h3>
-          </div>
-        </div>
-
-        <div class="col-6">
-            <ngb-rating class="rating" [(ngModel)]="newRating" [readonly]="false"></ngb-rating>
-        </div>
-
-        <label class="inp" for="name">
-          <input id="name" type="text" [(ngModel)]="description" minlength="1">
-          <span class="label">Description</span>
-          <span class="focus-bg"></span>
-        </label>
-
-        <div class="col-1 text-end">
-            <img
-                    class="icon"
-                    src="/assets/save-icon.png"
-                    (click)="CreateReview()"
-            >
-        </div>
-      </div>
-    </div>
-
-
-  <div *ngFor="let review of reviewsOfProduct" class="review-box col-12">
     <div class="row">
-      <div class="col-4">
-        <div>
-          <h3>{{review.authorId}}</h3>
+        <div class="review-box">
+
+            <div class="row">
+                <div class="col-4">
+                    <div>
+                        <h3>Authors username:</h3>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <ngb-rating class="rating" [(ngModel)]="newRating" [readonly]="false"></ngb-rating>
+                </div>
+
+                <label class="inp" for="name">
+                    <input id="name" type="text" [(ngModel)]="description" minlength="1">
+                    <span class="label">Description</span>
+                    <span class="focus-bg"></span>
+                </label>
+
+                <div class="col-1 text-end">
+                    <img
+                            class="icon"
+                            src="/assets/save-icon.png"
+                            (click)="CreateReview()"
+                    >
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="col-6">
-        <div *ngIf="!editMode">
-          <ngb-rating class="rating" [rate]="review.rating" [readonly]="true"></ngb-rating>
+
+        <div *ngFor="let review of reviewsOfProduct" class="review-box col-12">
+            <div class="row">
+                <div class="col-3">
+                    <div>
+                        <h3>{{review.author}}</h3>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div>
+                        <div *ngIf="!editMode">
+                            <ngb-rating class="rating" [rate]="review.rating" [readonly]="true"></ngb-rating>
+                        </div>
+
+                        <div *ngIf="editMode">
+                            <ngb-rating class="rating" [(ngModel)]="newRating" [readonly]="false"
+                                        style="color: grey"></ngb-rating>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-2" *ngIf="authService.userMayEdit(review.authorId) | async" >
+                    <div class="row">
+                        <div class="col-6">
+                            <div *ngIf="!editMode">
+                                <img
+                                        class="icon"
+                                        src="/assets/png-clipart-computer-icons-editing-edit-icon-cdr-angle-removebg-preview.png"
+                                        (click)="editMode = true"
+                                        *ngIf="authService.userMayEdit(review.authorId)"
+                                >
+                            </div>
+
+                            <div *ngIf="editMode">
+                                <img
+                                        class="icon"
+                                        src="/assets/save-icon.png"
+                                        (click)="saveReview(review)"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <img class="icon" (click)="DeleteReview(review?.id)"
+                                 src="/assets/delete-icon-removebg-preview.png">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="review-text">
+                <div *ngIf="!editMode">
+                    <p>{{review.description}}</p>
+                </div>
+
+                <div *ngIf="editMode">
+                    <label class="inp" for="name" *ngIf="authService.userMayEdit(review.authorId) | async" >
+                        <input id="name" type="text" [(ngModel)]="review.description" minlength="1">
+                        <span class="label">Description</span>
+                        <span class="focus-bg"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="review-date text-end">
+                <p>{{formatReviewDate(review.datetime)}}</p>
+            </div>
+
         </div>
-
-        <div *ngIf="editMode">
-          <ngb-rating class="rating" [(ngModel)]="newRating" [readonly]="false" style="color: grey"></ngb-rating>
-        </div>
-      </div>
-
-      <div class="col-1">
-        <div *ngIf="!editMode">
-          <img
-            class="icon"
-            src="/assets/png-clipart-computer-icons-editing-edit-icon-cdr-angle-removebg-preview.png"
-
-            (click)="editMode = true"
-          >
-        </div>
-
-        <div *ngIf="editMode">
-            <img
-                class="icon"
-                src="/assets/save-icon.png"
-
-                (click)="saveReview(review)"
-            >
-        </div>
-      </div>
-
-      <div class="col-1 text-end">
-        <img class="icon" (click)="DeleteReview(review?.id)" src="/assets/delete-icon-removebg-preview.png">
-      </div>
     </div>
-
-
-    <div class="review-text">
-      <div *ngIf="!editMode">
-        <p>{{review.description}}</p>
-      </div>
-
-      <div *ngIf="editMode">
-        <label class="inp" for="name">
-          <input id="name" type="text" [(ngModel)]="review.description" minlength="1">
-          <span class="label">Description</span>
-          <span class="focus-bg"></span>
-        </label>
-      </div>
-    </div>
-
-    <div class="review-date text-end">
-      <p>{{review.dateCreated}}</p>
-    </div>
-
-  </div>
-  </div>
 </div>
 

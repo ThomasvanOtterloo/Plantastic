@@ -3,6 +3,7 @@ import {User} from "../component-user-model";
 import {UserService} from "../user.service";
 import {Router} from "@angular/router";
 import {AuthService} from "@find-a-buddy/auth-ui";
+import {UserRegistration} from "@find-a-buddy/data";
 // import {AuthService} from "@find-a-buddy/auth-ui";
 // import {Subscription} from "rxjs";
 
@@ -13,11 +14,7 @@ import {AuthService} from "@find-a-buddy/auth-ui";
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-  public user: User = new User(0, '', '');
-  public password: string | undefined;
-  public confirmPassword: string | undefined;
-  public passwordsMatch: boolean = true;
-  // subs!: Subscription;
+
 
   constructor(
     private _userService: UserService,
@@ -29,24 +26,30 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
 
-
   }
 
+
+  user: UserRegistration = {
+    username: '',
+    password: '',
+  }
+  confirmPassword: string = 'Secret123$'
+  passwordsMatch: boolean = true;
   register() {
     console.log(this.user.password + ' ' + this.confirmPassword);
+
     if (this.user.password === this.confirmPassword) {
-      this.user!.password = this.password;
-      this._userService.create(this.user!);
-      // this.authService.register(this.user).subscribe((user) => {
-      //   if (user) {
-      //     console.log('register succeeded');
-      //     this.router.navigate(['/login']);
-      //   } else {
-      //     console.log('register failed');
-      //   }
-      // });
+
+      this.authService.register(this.user).subscribe((user) => {
+        if (user) {
+          console.log('register succeeded');
+          this.router.navigate(['/login']);
+        } else {
+          console.log('register failed');
+        }
+      });
       this.passwordsMatch = true;
-      this.router.navigate(['/sellers']);
+      this.router.navigate(['/login']);
     } else {
       console.log('Passwords do not match');
       this.passwordsMatch = false;

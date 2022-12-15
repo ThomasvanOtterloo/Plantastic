@@ -1,98 +1,98 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from "@angular/router";
-import {ProductService} from "../product.service";
+import {ProductService} from "../product.api.service";
 import {ReviewService} from "../review.service";
-import {Product} from "../component-product-model";
-import {Review} from "../component-review-model";
+import {Product} from "@find-a-buddy/data";
+import {Review} from "@find-a-buddy/data";
 import {AuthService} from "@find-a-buddy/auth-ui";
 import {of, Subscription, switchMap, tap} from "rxjs";
 import {UserInfo} from "@find-a-buddy/data";
 import {UserService} from "../../authentication/user.service";
 
 @Component({
-  selector: 'app-review',
-  templateUrl: './review.component.html',
-  styleUrls: ['./review.component.css']
+    selector: 'app-review',
+    templateUrl: './review.component.html',
+    styleUrls: ['./review.component.css']
 })
 
 export class ReviewComponent implements OnInit {
-  editMode = false;
-  loggedinUser = 'Thomas';
-  product: Product | undefined;
-  reviewsOfProduct: Review [] = [];
-  newRating: any;
-  description: any;
+    editMode = false;
+    loggedinUser = 'Thomas';
+    product: Product | undefined;
+    reviewsOfProduct2: Review [] = [];
+    newRating: any;
+    description: any;
+    subscriptionParams!: Subscription;
+    localUser!: UserInfo;
 
-  subscriptionParams!: Subscription;
-  user!: UserInfo;
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        public authService: AuthService,
+        private userService: UserService,
+        private _reviewService: ReviewService,
+        private _productService: ProductService
+    ) {}
 
+    @Input() reviewsOfProduct: any [] = [];
+    @Input() productId!: string;
+    @Output() onReviewChange = new EventEmitter<Product[]>();
 
+    ngOnInit(): void {
+        const userData = localStorage.getItem('currentuser');
+        if (userData) {
+            const localUser = JSON.parse(userData);
+            this.localUser = localUser;
+            console.log('local user', this.localUser);
+        }
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private userService: UserService,
-    private _reviewService: ReviewService,
-    private _productService: ProductService
-  ) {}
-
-
-
-
-  ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      this.product = this._productService.getProductById(params.get('id')!);
-    });
-    console.log(this.product);
-    this.GetReviews();
-
-
-
-
-  }
-
-
-  GetReviews() {
-    this.reviewsOfProduct = this._reviewService.getReviewsByProductId(this.product!.id);
-  }
-
-  CreateReview() {
-    console.log('Create Review');
-
-
-
-
-
-
-     let Review : Review = {
-      id: 11,
-       authorId: this.loggedinUser,
-      productId: this.product!.id,
-      rating: this.newRating,
-      description: this.description,
-
-       dateCreated: new Date(),
     }
-    console.log(Review);
-    this._reviewService.createReview(Review).then(r => {
-        this.GetReviews();
-    });
 
+    CreateReview() {
+        let Review : any = {
+            rating: this.newRating,
+            description: this.description,
+        }
+        this._reviewService.createReview(Review, this.productId).subscribe(
+            (data) => {
+                console.log(data);
+                this.onChange();
+            })
+    }
 
-  }
-  DeleteReview(id?: number) {
-    console.log('Delete Review');
-    this._reviewService.deleteReview(id);
-    this.GetReviews();
-  }
+    saveReview(review: Review) {
+        console.log('save review', review);
+        this.editMode = false;
+        review.rating = this.newRating;
+        this._reviewService.saveReview(review).subscribe(
+            (data) => {
+                console.log(data)
+                this.onChange();
+            }
+        );
+    }
 
-  saveReview(review: Review) {
-    this.editMode = false;
-    review.rating = this.newRating;
-    // this._reviewService.saveReview(this.product!.id, this.loggedinUser, this.product!.rating, this.product!.review);
-    this._reviewService.saveReview(review);
+    DeleteReview(id?: string) {
+        console.log('Delete Review');
+        this._reviewService.deleteReview(id).subscribe(
+            (data) => {
+                console.log(data);
+                this.onChange();
+            }
+        );
+    }
 
+    private onChange() {
+        this._productService.getProductById(this.productId).subscribe(
+            response => {
+                this.onReviewChange.emit(response);
+                console.log('product after chagne of review', this.onReviewChange);
+            }
+        );
+    }
 
-  }
+    formatReviewDate(date: Date) {
+        const newdate = new Date(date);
+        return newdate.toLocaleString('en-us',{month:'short', year:'numeric', day:'numeric'})
+    }
 }

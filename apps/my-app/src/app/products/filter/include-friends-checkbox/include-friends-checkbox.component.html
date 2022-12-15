@@ -1,5 +1,4 @@
 <section class="example-section">
-  <mat-checkbox *ngIf="hasFriends" (change)="setAll($event.checked)" class="example-margin">Friends interests</mat-checkbox>
-  <mat-checkbox *ngIf="!hasFriends" class="example-margin" [disabled]="true">Disabled</mat-checkbox>
+  <mat-checkbox (change)="setAll($event.checked)" class="example-margin">Friends interests</mat-checkbox>
 </section>
 

@@ -1,10 +1,7 @@
 import {Product, UserIdentity} from "@find-a-buddy/data";
 
 export interface Order {
-    id: string;
-    user: UserIdentity;
-    products: Product;
+    productId: string;
     quantity: number;
-    total: number;
-    deliveryDate: Date;
+    // product: Product;
 }
