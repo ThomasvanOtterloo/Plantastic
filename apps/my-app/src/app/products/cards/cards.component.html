@@ -4,28 +4,11 @@
   </div>
 
   <div class="col-md-3">
-    <div>
-      <mat-form-field appearance="fill">
-        <mat-label>Type of plant</mat-label>
-        <mat-select [ngModel]="selectedCategories" #category (ngModelChange)="onChange($event)"[formControl]="categories" multiple>
-          <mat-select-trigger>
-            {{categories.value?.[0] || ''}}
-            <span *ngIf="(categories.value?.length || 0) > 1" class="example-additional-selection">
-            (+{{(categories.value?.length || 0) - 1}} {{categories.value?.length === 2 ? 'other' : 'others'}})
-          </span>
-          </mat-select-trigger>
-          <mat-option [value]="category" *ngFor="let category of categoryList" [value]="category">{{category}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </div>
-
-  <div class="col-md-3">
    <app-include-friends-checkbox (getBoolean)="getBoolean($event)" ></app-include-friends-checkbox>
   </div>
 
-  <div class="col-md-2">
-    <button class="btn btn-primary"
+  <div class="col-md-5 text-end">
+    <button class="btn btn-primary "
             routerLink="create"
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
@@ -47,7 +30,7 @@
 
 
 
-  <div class="row gy-4" data-aos="fade-up" data-aos-delay="100">
+  <div class="row gy-4" data-aos="fade-up" data-aos-delay="100" style="margin-right: 0; margin-left: 0;">
     <div class="col-lg-4 col-md-6" *ngFor="let item of followInterestProducts">
       <div *ngIf="searchText === '' || item.name.toLowerCase().includes(searchText)">
         <div *ngIf="item.quantity != 0" class="service-item  position-relative">
@@ -68,19 +51,19 @@
 
                 <div class="col-5 " *ngIf="item.category.length == 1">
                   <div class="icon">
-                    <i style="right: 3px;">{{item.category[0]}}</i>
+                    <i>{{item.category[0]}}</i>
                   </div>
                 </div>
 
                 <div class="col-5 " *ngIf="item.category.length > 1">
                   <div class="icon">
-                    <i style="right: 3px;">{{item.category[0]}} + ...</i>
+                    <i>{{item.category[0]}} + ...</i>
                   </div>
                 </div>
 
-                <div class="col-2 text-end">
+                <div class="col-2" style="padding-right: 7px">
                   <div class="icon">
-                    <i style="right: 3px;">{{item.price | currency:'EUR':true  }}</i>
+                    <i>{{item.price | currency:'EUR':true  }}</i>
                   </div>
                 </div>
               </div>
@@ -142,49 +125,7 @@
 </div>
 
 
-<div class="row gy-4" data-aos="fade-up" data-aos-delay="100">
-  <div class="col-lg-4 col-md-6" *ngFor="let item of products">
-    <div *ngIf="searchText === '' || item.name.toLowerCase().includes(searchText)">
-      <div *ngIf="item.quantity != 0" class="service-item  position-relative">
 
-        <a routerLink="{{ item.id }}"
-           routerLinkActive="active"
-           ariaCurrentWhenActive="page">
-
-          <img class="card-image" [src]="item?.image" alt="image"/>
-
-          <div class="card-content">
-            <div class="row">
-              <div class="col-5">
-                <div class="icon">
-                  <h3 class="card-title">{{item.name}}</h3>
-                </div>
-              </div>
-
-              <div class="col-5 " *ngIf="item.category.length == 1">
-                <div class="icon">
-                  <i style="right: 3px;">{{item.category[0]}}</i>
-                </div>
-              </div>
-
-              <div class="col-5 " *ngIf="item.category.length > 1">
-                <div class="icon">
-                  <i style="right: 3px;">{{item.category[0]}} + ...</i>
-                </div>
-              </div>
-
-              <div class="col-2 text-end">
-                <div class="icon">
-                  <i style="right: 3px;">{{item.price | currency:'EUR':true  }}</i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
 
 

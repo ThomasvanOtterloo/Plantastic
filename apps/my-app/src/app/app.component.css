@@ -1,12 +1,22 @@
 .wrapper{
   background-color: #FDEBD0;
+  /*display: block;*/
+  /*height: 100%;*/
+
+
 }
 
 .wrapper2{
+  background-color: #FDEBD0;
   margin: 0px auto;
   width: 75%;
-  background-color: #F9F6EE;
+  position: relative;
+  height: 100%;
+  display: block;
+}
 
+.card-footer{
+  padding-top: 100px;
 }
 
 

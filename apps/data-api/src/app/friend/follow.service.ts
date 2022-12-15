@@ -141,7 +141,7 @@ export class FollowService {
 
 
       const getListOfFollowersInterests = await this.neo4jService.singleRead(
-        'MATCH (u:User {id: $id})-[r:FOLLOWS]->(f:User)-[:SOLD_BY|:ORDERED]->(p:Product) RETURN p',
+        'MATCH (u:User {id: $id})-[r:FOLLOWS]->(f:User)-[:SOLD_BY|:ORDERED]->(p:Product) RETURN DISTINCT p',
         {id: userId}
         );
 

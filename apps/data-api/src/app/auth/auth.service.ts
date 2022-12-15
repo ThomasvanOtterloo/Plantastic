@@ -23,15 +23,10 @@ export class AuthService {
         const user = new this.userModel({username});
         await user.save();
 
-        console.log('trying to create user:');
-
         const result = await this.neo4jService.singleWrite(
             'CREATE (u:User {id: $id, username: $username}) RETURN u',
             {id: user.id, username: user.username}
         );
-
-        console.log('created user:');
-        console.log(result);
 
         return user.id;
       }

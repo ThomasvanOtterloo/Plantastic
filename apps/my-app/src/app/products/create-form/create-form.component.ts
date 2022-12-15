@@ -3,6 +3,7 @@ import {Category, Product} from "@find-a-buddy/data";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ProductService} from "../product.api.service";
 import {FormControl} from "@angular/forms";
+import {AlertService} from "@find-a-buddy/util-ui";
 
 @Component({
   selector: 'app-create-form',
@@ -22,12 +23,15 @@ export class CreateFormComponent implements OnInit {
   categories = new FormControl('');
   categoryList: string[] = [];
   selectedCategories: Category[] = [];
+    success: any;
+
 
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private _productService: ProductService,
+    private _alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -35,9 +39,11 @@ export class CreateFormComponent implements OnInit {
 
   create() {
     console.log(this.product);
+    this._alertService.success('Product created!');
     this._productService.createProduct(this.product).subscribe(
         (data) => {
-            console.log(data);
+            console.log('success', data);
+            this.success = true;
             this.router.navigate(['/sellers']);
         }
     );
@@ -48,3 +54,4 @@ export class CreateFormComponent implements OnInit {
     console.log(this.product + $event + "got the data from child!");
   }
 }
+

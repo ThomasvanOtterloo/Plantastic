@@ -31,20 +31,10 @@ describe('AuthService', () => {
             return {uri};
           },
         }),
-        Neo4jModule.forRoot({
-          scheme: 'neo4j',
-          host: 'localhost',
-          username: 'thomas',
-          password: process.env.NEO4J_PASSWORD,
-          database: 'neo4j'
-        }),
         MongooseModule.forFeature([{ name: Identity.name, schema: IdentitySchema }]),
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       ],
       providers: [AuthService, Neo4jService],
-
-
-
     }).compile();
 
     service = app.get<AuthService>(AuthService);
@@ -54,7 +44,7 @@ describe('AuthService', () => {
   });
 
   beforeEach(async () => {
-    await mongoc.db('plantastic').collection('identities').deleteMany({});
+    await mongoc.db('test').collection('identities').deleteMany({});
   })
 
   afterAll(async () => {
@@ -63,52 +53,52 @@ describe('AuthService', () => {
     await mongod.stop();
   });
 
-  // describe('create', () => {
-  //   it('should create a new user', async () => {
-  //     const exampleUser = {username: 'mario'};
-  //
-  //     await service.createUser(exampleUser.username);
-  //
-  //     const found = await mongoc.db('plantastic').collection('users').findOne({username: exampleUser.username});
-  //
-  //     expect(found).toHaveProperty('username', exampleUser.username);
-  //   });
-  // });
+  describe('create', () => {
+    it('should create a new user', async () => {
+      const exampleUser = {username: 'mario'};
 
-  // describe('verify token', () => {
-  //   it('should accept a valid token', async () => {
-  //     const examplePayload = {username: 'userid'}
-  //
-  //     const token = sign(examplePayload, process.env.JWT_SECRET, {expiresIn: '1h'});
-  //
-  //     const verifiedToken = await service.verifyToken(token);
-  //
-  //     expect(verifiedToken).toHaveProperty('username', examplePayload.username);
-  //   });
-  //
-  //   it('should throw on invalid token', async () => {
-  //     const token = 'fake.fake.fake';
-  //
-  //     await expect(service.verifyToken(token)).rejects.toThrow();
-  //   });
-  // })
+      await service.createUser(exampleUser.username);
+
+      const found = await mongoc.db('plantastic').collection('users').findOne({username: exampleUser.username});
+
+      expect(found).toHaveProperty('username', exampleUser.username);
+    });
+  });
+
+  describe('verify token', () => {
+    it('should accept a valid token', async () => {
+      const examplePayload = {username: 'userid'}
+
+      const token = sign(examplePayload, process.env.JWT_SECRET, {expiresIn: '1h'});
+
+      const verifiedToken = await service.verifyToken(token);
+
+      expect(verifiedToken).toHaveProperty('username', examplePayload.username);
+    });
+
+    it('should throw on invalid token', async () => {
+      const token = 'fake.fake.fake';
+
+      await expect(service.verifyToken(token)).rejects.toThrow();
+    });
+  })
 
   describe('generate token', () => {
-    // it('should generate a token with user id', async () => {
-    //   const exampleUser = {username: 'dion', password: 'ditisnietmijnwachtwoord'};
-    //
-    //   await mongoc.db('plantastic').collection('identities').insertOne({
-    //     username: exampleUser.username,
-    //     hash: hashSync(exampleUser.password, parseInt(process.env.SALT_ROUNDS, 10)),
-    //   });
-    //   await mongoc.db('plantastic').collection('users').insertOne({
-    //     username: exampleUser.username,
-    //     id: 'id1234',
-    //   });
-    //
-    //   const token = await service.generateToken(exampleUser.username, exampleUser.password);
-    //   expect(typeof token).toBe('object');
-    // });
+    it('should generate a token with user id', async () => {
+      const exampleUser = {username: 'dion', password: 'ditisnietmijnwachtwoord'};
+
+      await mongoc.db('plantastic').collection('identities').insertOne({
+        username: exampleUser.username,
+        hash: hashSync(exampleUser.password, parseInt(process.env.SALT_ROUNDS, 10)),
+      });
+      await mongoc.db('plantastic').collection('users').insertOne({
+        username: exampleUser.username,
+        id: 'id1234',
+      });
+
+      const token = await service.generateToken(exampleUser.username, exampleUser.password);
+      expect(typeof token).toBe('object');
+    });
 
     it('should throw when user is not found', async () => {
       await expect(service.generateToken('notfound', 'verysecret')).rejects.toThrow();

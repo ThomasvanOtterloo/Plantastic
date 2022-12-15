@@ -34,7 +34,7 @@ import {MAT_CHECKBOX_DEFAULT_OPTIONS, MatCheckboxDefaultOptions} from "@angular/
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthService} from "@find-a-buddy/auth-ui";
-import { ConfigModule , CustomConfig} from "@find-a-buddy/util-ui";
+import {ConfigModule, CustomConfig, UtilUIModule} from "@find-a-buddy/util-ui";
 import {TokenInterceptor} from "../../token.interceptor";
 import { FollowUserComponent } from './follow-user/follow-user.component';
 import { OrderComponent } from './order/order.component';
@@ -88,23 +88,24 @@ const routes: Routes = [
     FollowUserComponent,
     OrderComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    NgbModule,
-    BrowserAnimationsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatNativeDateModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatCheckboxModule,
-    HttpClientModule,
-    ConfigModule,
-    CustomConfig,
-    RouterModule.forRoot(routes),
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        NgbModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatNativeDateModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatCheckboxModule,
+        HttpClientModule,
+        ConfigModule,
+        CustomConfig,
+        RouterModule.forRoot(routes),
+        UtilUIModule,
+    ],
   exports: [
     RouterModule
   ],

@@ -232,10 +232,7 @@ let AuthService = class AuthService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = new this.userModel({ username });
             yield user.save();
-            console.log('trying to create user:');
             const result = yield this.neo4jService.singleWrite('CREATE (u:User {id: $id, username: $username}) RETURN u', { id: user.id, username: user.username });
-            console.log('created user:');
-            console.log(result);
             return user.id;
         });
     }
@@ -702,7 +699,7 @@ let FollowService = class FollowService {
     }
     getFollowersInterests(userId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const getListOfFollowersInterests = yield this.neo4jService.singleRead('MATCH (u:User {id: $id})-[r:FOLLOWS]->(f:User)-[:SOLD_BY|:ORDERED]->(p:Product) RETURN p', { id: userId });
+            const getListOfFollowersInterests = yield this.neo4jService.singleRead('MATCH (u:User {id: $id})-[r:FOLLOWS]->(f:User)-[:SOLD_BY|:ORDERED]->(p:Product) RETURN DISTINCT p', { id: userId });
             const getResultOfInterests = getListOfFollowersInterests.records.map((record) => {
                 return record.get('p').properties;
             });
