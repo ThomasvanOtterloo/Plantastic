@@ -3,6 +3,7 @@ import {OrderService} from "../products/order-dialog/order.service";
 import {Order} from "@find-a-buddy/data";
 import {ProductService} from "../products/product.api.service";
 import { map, switchMap } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'find-a-buddy-order',
@@ -13,6 +14,7 @@ export class OrderComponent implements OnInit {
   orders: any | undefined = [];
   constructor(
     private orderService: OrderService,
+    private router: Router,
   ) {}
 
     ngOnInit(): void {
