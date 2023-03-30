@@ -1,6 +1,5 @@
 .node_modules
 .angular/cache
-.env
 
 node_modules
 

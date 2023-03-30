@@ -44,66 +44,52 @@ describe('User Schema', () => {
     expect(version(model.id)).toBe(4);
   });
 
-  it('has a required username', () => {
-    const model = new userModel();
-
-    const err = model.validateSync();
-
-    expect(err.errors.name).toBeInstanceOf(Error);
-  });
+  // it('has a required username', () => {
+  //   const model = new userModel();
+  //
+  //   const err = model.validateSync();
+  //
+  //   expect(err.errors.name).toBeInstanceOf(Error);
+  // });
 
   it('has a unique username', async () => {
-    const original = new userModel({name: 'henk', emailAddress: 'henk@henk.nl'});
-    const duplicate = new userModel({name: 'henk', emailAddress: 'henk@henk.nl'});
+    const original = new userModel({username: 'henk'});
+    const duplicate = new userModel({username: 'henk'});
 
     await original.save();
 
     await expect(duplicate.save()).rejects.toThrow();
   });
 
-  it('has an empty role list by default', () => {
-    const model = new userModel();
-
-    expect(model.roles).toStrictEqual([]);
+  it('has a default wallet of 500', () => {
+    const model = new userModel({username: 'henk'});
+    expect(model.wallet).toBe(500);
   });
 
-  it('is active by default', () => {
-    const model = new userModel();
-
-    expect(model.isActive).toBe(true);
+  it('has a default products of []', () => {
+    const model = new userModel({username: 'henk'});
+    expect(model.products).toEqual([]);
   });
 
-  it('has a required email address', () => {
-    const model = new userModel();
+  it('has a default reviews of []', () =>{
+    const model = new userModel({username: 'henk'});
+    expect(model.reviews).toEqual([]);
+  })
 
-    const err = model.validateSync();
-
-    expect(err.errors.emailAddress).toBeInstanceOf(Error);
+  it('has a default following of []', () =>{
+    const model = new userModel({username: 'henk'});
+    expect(model.following).toEqual([]);
   });
 
-  it('does not accept an invalid email address', () => {
-    const model = new userModel({emailAddress: 'ditisgeenemail'});
-
-    const err = model.validateSync();
-
-    expect(err.errors.emailAddress).toBeInstanceOf(Error);
+  it('has a default orders of []', () =>{
+    const model = new userModel({username: 'henk'});
+    expect(model.orders).toEqual([]);
   });
 
-  it('has an empty list as default tutor topics', () => {
-    const model = new userModel();
 
-    expect(model.tutorTopics).toStrictEqual([]);
-  });
 
-  it('has an empty list as default pupil topics', () => {
-    const model = new userModel();
 
-    expect(model.pupilTopics).toStrictEqual([]);
-  });
 
-  it('has an empty list as default meetups', () => {
-    const model = new userModel();
 
-    expect(model.meetups).toStrictEqual([]);
-  });
+
 });

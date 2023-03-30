@@ -6,7 +6,7 @@ import { map, catchError, switchMap } from 'rxjs/operators';
 import { AlertService, ConfigService } from '@find-a-buddy/util-ui';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {InjectToken, Token} from "../../../../apps/data-api/src/app/auth/token.decorator";
-
+import {HttpBackend} from "@angular/common/http";
 
 
 @Injectable({
@@ -21,11 +21,13 @@ export class AuthService {
   });
 
   constructor(
+      private handler: HttpBackend,
     private configService: ConfigService,
     private alertService: AlertService,
     private http: HttpClient,
     private router: Router
   ) {
+    this.http = new HttpClient(handler);
     console.log(
       'AuthService constructor ' + configService.getConfig().apiEndpoint
     );
@@ -73,7 +75,8 @@ export class AuthService {
           console.log("token: " + user.token);
           this.saveUserToLocalStorage(user);
 
-          // this.currentUser$.next(user);
+          console.log(user);
+          this.currentUser$.next(user);
           console.log('login - currentUser: ' + this.currentUser$.value);
           this.alertService.success('You have been logged in');
           return user;
@@ -91,22 +94,15 @@ export class AuthService {
 
 
   register(userData: UserRegistration): Observable<UserInfo | undefined> {
-    console.log(
-      `register at ${this.url}user`
-    );
     console.log(userData);
     return this.http
       .post<UserInfo>(
-        `${this.url}user`,
-        userData,
-        {
-          headers: this.headers,
-        }
+        `http://localhost:3333/auth-api/register`,
+        userData
       )
       .pipe(
         map((user) => {
-          // this.saveUserToLocalStorage(user)
-          // this.currentUser$.next(user)
+
           this.alertService.success('You have been registered');
           return user;
         }),
@@ -152,7 +148,6 @@ export class AuthService {
   }
 
   userMayEdit(itemUserId: string): Observable<boolean> {
-    console.log('userMayEdit');
     return this.currentUser$.pipe(
       map((user: UserInfo | undefined) =>
         user ? user.id === itemUserId : false
@@ -178,7 +173,7 @@ export class AuthService {
       const user: UserInfo = JSON.parse(userData);
 
       console.log('LET OP, TO DO!');
-      return user.name; // user.token;
+      return user.username; // user.token;
     }
     return undefined;
   }

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {Product} from "../component-product-model";
-import {ProductService} from "../product.service";
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {Product, UserInfo} from "@find-a-buddy/data";
+import {ProductService} from "../product.api.service";
+import {MatDialog} from '@angular/material/dialog';
 import {OrderDialogComponent} from "../order-dialog/order-dialog.component";
 
 @Component({
@@ -13,10 +13,11 @@ import {OrderDialogComponent} from "../order-dialog/order-dialog.component";
 
 export class DetailsComponent implements OnInit {
   componentId: string | null | undefined;
-  product: Product | undefined;
+  product: any;
+  localUser!: UserInfo;
 
   isFollowed: boolean = false;
-  follow:string = "Follow";
+  followState:string = "Follow";
 
   constructor(
     private route: ActivatedRoute,
@@ -25,25 +26,44 @@ export class DetailsComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
+
+
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       this.componentId = params.get("id");
       if (this.componentId) {
         // Bestaande user
         console.log("Bestaande component");
-        this.product = this._productService.getProductById(this.componentId);
+        this.product = this._productService.getProductById(this.componentId).subscribe(
+            response => {
+                this.product = response;
+                console.log('this product',this.product);
+            }
+        );
       } else {
         // Nieuwe user
         console.log("Nieuwe component");
       }
     });
+
+    const userData = localStorage.getItem('currentuser');
+    if (userData) {
+      this.localUser = JSON.parse(userData);
+      console.log('local user', this.localUser);
+    }
+
   }
+
 
   delete() {
     if (this.componentId) {
       console.log("Verwijderen van component met id: " + this.componentId);
-          this._productService.deleteProductById(this.componentId);
-          this.router.navigate(['/sellers']).then(r => console.log(r));
+          this._productService.deleteProduct(this.componentId).subscribe(
+                response => {
+                    console.log('response',response);
+                    this.router.navigate(['/sellers']).then(r => console.log(r));
+                }
+          );
         } else {
           console.log("Geen id");
         }
@@ -71,8 +91,19 @@ export class DetailsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(() => {
       console.log('The dialog was closed');
-
     });
   }
+
+  onReviewChange($event: Product[]) {
+    console.log($event);
+    this.product = $event;
+  }
+
+  getAvgRating() {
+    return this.product.reviews.map((review: any) => {
+      return review.rating;
+    }).reduce((a: number, b: number) => a + b, 0) / this.product.reviews.length;
+  }
+
 
 }

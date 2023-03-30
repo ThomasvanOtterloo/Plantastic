@@ -25,13 +25,6 @@ export class Product {
 
   @Prop({
     required: true,
-    validate: [rating => rating >= 0 && rating <= 10, 'Rating must be between 0 and 10'],
-  })
-  rating: number;
-
-
-  @Prop({
-    required: true,
   })
   price: number;
 
@@ -46,7 +39,13 @@ export class Product {
   author: string;
 
   @Prop({
+    required: true,
+  })
+  authorId: string;
+
+  @Prop({
     required: false,
+    default: 'https://static.vecteezy.com/system/resources/previews/002/425/076/non_2x/plant-leaves-in-a-pot-beautiful-green-houseplant-isolated-simple-trendy-flat-style-for-interior-garden-decoration-design-free-vector.jpg'
   })
   image: string;
 

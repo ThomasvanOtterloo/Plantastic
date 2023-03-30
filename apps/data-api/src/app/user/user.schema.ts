@@ -1,10 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import isEmail from 'validator/lib/isEmail';
 import {Product, Review} from "@find-a-buddy/data";
+import {Order} from "../order/order.schema";
 
-// import { Meetup } from '../meetup/meetup.schema';
 
 export type UserDocument = User & Document;
 
@@ -26,13 +25,18 @@ export class User {
   wallet: number;
 
   @Prop({default: []})
-  friends: User[];
+  following: User[];
 
   @Prop({default: []})
   products: Product[];
 
   @Prop({default: []})
   reviews: Review[];
+
+  @Prop({default: []})
+  orders: Order[];
+
+
 
 }
 

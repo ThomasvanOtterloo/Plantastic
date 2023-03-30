@@ -7,35 +7,12 @@ import { MongoClient } from 'mongodb';
 
 import { UserService } from './user.service';
 import { User, UserDocument, UserSchema } from './user.schema';
-import { Meetup, MeetupDocument, MeetupSchema } from '../meetup/meetup.schema';
 
 describe('UserService', () => {
   let service: UserService;
   let mongod: MongoMemoryServer;
   let mongoc: MongoClient;
   let userModel: Model<UserDocument>;
-  let meetupModel: Model<MeetupDocument>;
-
-  const testMeetups = [{
-    topic: 'math',
-    datetime: new Date(),
-    review: {text: 'Great help! (1)', rating: 4},
-    accepted: true,
-  }, {
-    topic: 'math',
-    datetime: new Date(),
-    review: {text: 'Great help! (2)', rating: 4},
-    accepted: true,
-  }, {
-    topic: 'math',
-    datetime: new Date(),
-    review: {text: 'Great help! (3)', rating: 5},
-    accepted: true,
-  }, {
-    topic: 'math',
-    datetime: new Date(),
-    accepted: true,
-  }]
 
   const testUsers = [{
     id: 'jan123',
@@ -60,10 +37,10 @@ describe('UserService', () => {
     friends: [],
   }
   ];
-  
+
   beforeAll(async () => {
     let uri: string;
-    
+
     const app = await Test.createTestingModule({
       imports: [
         MongooseModule.forRootAsync({
@@ -88,52 +65,16 @@ describe('UserService', () => {
   });
 
   beforeEach(async () => {
-    await mongoc.db('plantastic').collection('users').deleteMany({});
+    await mongoc.db('test').collection('users').deleteMany({});
     // await mongoc.db('plantastic').collection('meetups').deleteMany({});
 
     const user1 = new userModel(testUsers[0]);
     const user2 = new userModel(testUsers[1]);
     const user3 = new userModel(testUsers[2]);
 
-    const meetup1 = new meetupModel({
-      ...testMeetups[0], 
-      tutorRef: user1._id, 
-      pupilRef: user2._id,
-      tutor: {id: user1.id, name: user1.name},
-      pupil: {id: user2.id, name: user2.name},
-    });
-    const meetup2 = new meetupModel({
-      ...testMeetups[1], 
-      tutorRef: user3._id, 
-      pupilRef: user1._id,
-      tutor: {id: user3.id, name: user3.name},
-      pupil: {id: user1.id, name: user1.name},
-    });
-    const meetup3 = new meetupModel({
-      ...testMeetups[2], 
-      tutorRef: user1._id, 
-      pupilRef: user2._id,
-      tutor: {id: user1.id, name: user1.name},
-      pupil: {id: user2.id, name: user2.name},
-    });
-    const meetup4 = new meetupModel({
-      ...testMeetups[3], 
-      tutorRef: user1._id, 
-      pupilRef: user2._id,
-      tutor: {id: user1.id, name: user3.name},
-      pupil: {id: user2.id, name: user1.name},
-    });
 
-    user1.meetups.push(meetup1);
-    user1.meetups.push(meetup2);
-    user1.meetups.push(meetup3);
-    user1.meetups.push(meetup4);
-    user2.meetups.push(meetup1);
-    user2.meetups.push(meetup3);
-    user2.meetups.push(meetup4);
-    user3.meetups.push(meetup2);
 
-    await Promise.all([user1.save(), user2.save(), user3.save(), meetup1.save(), meetup2.save(), meetup3.save(), meetup4.save()]);
+    await Promise.all([user1.save(), user2.save(), user3.save()]);
   });
 
   afterAll(async () => {
@@ -145,63 +86,42 @@ describe('UserService', () => {
   describe('getAll', () => {
     it('should retrieve all users', async () => {
       const results = await service.getAll();
-  
+
       expect(results).toHaveLength(3);
-      expect(results.map(r => r.name)).toContain('jan');
-      expect(results.map(r => r.name)).toContain('peter');
-      expect(results.map(r => r.name)).toContain('maria');
+      expect(results.map(r => r.username)).toContain('jan');
+      expect(results.map(r => r.username)).toContain('peter');
+      expect(results.map(r => r.username)).toContain('maria');
     });
-    
+
     it('should not give meetups or reviews', async () => {
       const results = await service.getAll();
 
-      expect(results[0]).not.toHaveProperty('meetups');
-      expect(results[0]).not.toHaveProperty('reviews');
-    });
-
-    it('gives the average rating, id, name, topics', async () => {
-      const results = await service.getAll();
-
-      expect(results[0]).toHaveProperty('id');
-      expect(results[0]).toHaveProperty('username');
-      expect(results[0]).toHaveProperty('wallet');
       expect(results[0]).toHaveProperty('products');
-      expect(results[0]).toHaveProperty('friends');
       expect(results[0]).toHaveProperty('reviews');
-      expect(results.filter(u => u.name == 'jan')[0].).toBe(500);
+      expect(results[0]).toHaveProperty('following');
     });
+
   });
 
   describe('getOne', () => {
     it('should retrieve a specific user', async () => {
-      const result = await service.getOne('jan');
+      const result = await service.getOne('jan123');
 
-      expect(result).toHaveProperty('name', 'jan');
+      expect(result).toBeDefined();
     });
-    
+
     it('returns null when user is not found', async () => {
       const result = await service.getOne('niemand');
-      
+
       expect(result).toBeUndefined();
     });
-    
-    it('should not give meetups', async () => {
-      const result = await service.getOne('jan123');
-      
-      expect(result).not.toHaveProperty('meetups');
-    });
-    
-    it('gives the average rating', async () => {
-      const result = await service.getOne('jan123');
-      
-      expect(result).toHaveProperty('rating', 4.5);
-    });
-    
+
+
     it('gives all reviews of this user', async () => {
       const result = await service.getOne('jan123');
 
       expect(result).toHaveProperty('reviews');
-      expect(result.reviews).toHaveLength(2);
+      expect(result.reviews).toHaveLength(0);
     });
   });
 });

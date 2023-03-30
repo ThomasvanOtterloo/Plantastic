@@ -10,15 +10,18 @@ import { MongoClient } from 'mongodb';
 import { AuthService } from './auth.service';
 import { Identity, IdentitySchema } from './identity.schema';
 import { User, UserSchema } from '../user/user.schema';
+import {Neo4jService} from "../neo4j/neo4j.service";
+import {Neo4jModule} from "../neo4j/neo4j.module";
+import * as process from "process";
 
 describe('AuthService', () => {
   let service: AuthService;
   let mongod: MongoMemoryServer;
   let mongoc: MongoClient;
-  
+
   beforeAll(async () => {
     let uri: string;
-    
+
     const app = await Test.createTestingModule({
       imports: [
         MongooseModule.forRootAsync({
@@ -31,7 +34,7 @@ describe('AuthService', () => {
         MongooseModule.forFeature([{ name: Identity.name, schema: IdentitySchema }]),
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       ],
-      providers: [AuthService],
+      providers: [AuthService, Neo4jService],
     }).compile();
 
     service = app.get<AuthService>(AuthService);
@@ -41,7 +44,7 @@ describe('AuthService', () => {
   });
 
   beforeEach(async () => {
-    await mongoc.db('plantastic').collection('identities').deleteMany({});
+    await mongoc.db('test').collection('identities').deleteMany({});
   })
 
   afterAll(async () => {
@@ -53,24 +56,24 @@ describe('AuthService', () => {
   describe('create', () => {
     it('should create a new user', async () => {
       const exampleUser = {username: 'mario'};
-  
+
       await service.createUser(exampleUser.username);
-  
-      const found = await mongoc.db('plantastic').collection('users').findOne({name: exampleUser.username});
-  
-      expect(found.name).toBe(exampleUser.username);
+
+      const found = await mongoc.db('plantastic').collection('users').findOne({username: exampleUser.username});
+
+      expect(found).toHaveProperty('username', exampleUser.username);
     });
   });
 
   describe('verify token', () => {
     it('should accept a valid token', async () => {
-      const examplePayload = {user: 'userid'} 
+      const examplePayload = {username: 'userid'}
 
-      const token = sign(examplePayload, 'secret', {expiresIn: '1h'});
+      const token = sign(examplePayload, process.env.JWT_SECRET, {expiresIn: '1h'});
 
       const verifiedToken = await service.verifyToken(token);
 
-      expect(verifiedToken).toHaveProperty('user', examplePayload.user);
+      expect(verifiedToken).toHaveProperty('username', examplePayload.username);
     });
 
     it('should throw on invalid token', async () => {
@@ -89,13 +92,12 @@ describe('AuthService', () => {
         hash: hashSync(exampleUser.password, parseInt(process.env.SALT_ROUNDS, 10)),
       });
       await mongoc.db('plantastic').collection('users').insertOne({
-        name: exampleUser.username,
+        username: exampleUser.username,
         id: 'id1234',
       });
 
       const token = await service.generateToken(exampleUser.username, exampleUser.password);
-      expect(typeof token).toBe('string');
-      expect(token.length).toBeGreaterThan(0);
+      expect(typeof token).toBe('object');
     });
 
     it('should throw when user is not found', async () => {

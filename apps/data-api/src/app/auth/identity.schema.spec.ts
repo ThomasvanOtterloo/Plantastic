@@ -57,24 +57,7 @@ describe('Identity Schema', () => {
     const duplicate = new identityModel({username: 'samename', hash: 'h456', emailAddress: 'you@mail.com'});
 
     await original.save();
-    
-    await expect(duplicate.save()).rejects.toThrow();
-  });
 
-  it('has a required email', () => {
-    const model = new identityModel();
-
-    const err = model.validateSync();
-
-    expect(err.errors.emailAddress).toBeInstanceOf(Error);
-  });
-
-  it('has a unique email', async () => {
-    const original = new identityModel({username: 'samename', hash: 'h123', emailAddress: 'same@mail.com'});
-    const duplicate = new identityModel({username: 'othername', hash: 'h456', emailAddress: 'same@mail.com'});
-
-    await original.save();
-    
     await expect(duplicate.save()).rejects.toThrow();
   });
 

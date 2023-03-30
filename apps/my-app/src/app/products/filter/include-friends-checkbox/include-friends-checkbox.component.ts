@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-
+import { Component, EventEmitter, OnInit, Output ,OnChanges} from '@angular/core';
+import {FollowUserService} from "../../followUser.service";
 
 @Component({
   selector: 'app-include-friends-checkbox',
@@ -7,18 +7,19 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./include-friends-checkbox.component.css']
 })
 export class IncludeFriendsCheckboxComponent implements OnInit {
-  hasFriends: boolean = true;
+  products: any = [];
 
-  constructor() { }
+  constructor(
+  ) {
+  }
 
   ngOnInit(): void {
   }
 
-  ngOnChanges(): void {
-    console.log(this.hasFriends)
-  }
+  @Output() getBoolean = new EventEmitter<boolean>();
 
   setAll(checked: boolean) {
-    console.log(checked)
+    console.log('2',checked)
+    this.getBoolean.emit(checked);
   }
 }

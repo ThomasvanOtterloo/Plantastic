@@ -1,4 +1,4 @@
-import { Token } from '@find-a-buddy/data';
+import {Token, UserInfo} from '@find-a-buddy/data';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthController } from './auth.controller';
@@ -22,8 +22,8 @@ describe('AuthController', () => {
       }],
     }).compile();
 
-   authController = app.get<AuthController>(AuthController);
-   authService = app.get<AuthService>(AuthService);
+    authController = app.get<AuthController>(AuthController);
+    authService = app.get<AuthService>(AuthService);
   });
 
   beforeEach(() => {
@@ -41,14 +41,14 @@ describe('AuthController', () => {
       exampleId = 'id123';
 
       create = jest.spyOn(authService, 'createUser')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .mockImplementation(async (_u: string) => {return exampleId;});
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .mockImplementation(async (_u: string) => {return exampleId;});
     });
 
     it('should call the register and create method of the auth service on success', async () => {
       register = jest.spyOn(authService, 'registerUser')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .mockImplementation(async (_u: string, _p: string) => {return;});
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .mockImplementation(async (_u: string, _p: string) => {return;});
 
       const id = await authController.register(exampleUser);
 
@@ -59,8 +59,8 @@ describe('AuthController', () => {
 
     it('should not call create on failed register (duplicate username)', async () => {
       register = jest.spyOn(authService, 'registerUser')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .mockImplementation(async (_u: string, _p: string) => {throw new Error('duplicate user');});
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .mockImplementation(async (_u: string, _p: string) => {throw new Error('duplicate user');});
 
       await expect(authController.register(exampleUser)).rejects.toThrow();
       expect(create).not.toHaveBeenCalled();
@@ -73,11 +73,12 @@ describe('AuthController', () => {
         username: 'henk',
         password: 'supersecret123',
       };
-      const mockedToken: Token = {token: 'mockedToken'};
+      const mockedToken: UserInfo = {token: 'mockedToken', username: 'henk', id: 'id123', password: ''};
 
       const register = jest.spyOn(authService, 'generateToken')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .mockImplementation(async (_u: string, _p: string) => {return mockedToken.token;});
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .mockImplementation(
+              async (a : string, b: string) => {return mockedToken;});
 
       expect(await authController.login(exampleUser)).toStrictEqual(mockedToken);
 

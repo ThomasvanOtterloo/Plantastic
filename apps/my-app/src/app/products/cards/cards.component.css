@@ -1,4 +1,20 @@
 
+.btn {
+/*  Make a button when hovered over it, it turns a different color slowley.*/
+    background-color: blue;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+/*  add more space on the top*/
+    margin-top: 10px;
+    text-align: end;
+    margin-right: 10px;
+}
 
 
 a {
@@ -7,7 +23,9 @@ a {
   background-color: transparent;
 }
 
-
+.followingText{
+  padding-left: 10px;
+}
 
 .services {
   padding: 60px 0;
@@ -76,8 +94,8 @@ a {
   position: absolute;
   bottom: 0;
   right: 0;
-  margin-bottom: -5px;
-  margin-right: -5px;
+  margin-bottom: -3px;
+  margin-right: -3px;
   font-size: 20px;
 }
 
@@ -89,4 +107,10 @@ a {
 
 .services .service-item:hover h3 {
   border-color: var(--color-primary);
+}
+
+
+.row {
+    margin-right: 0;
+    margin-left: 0;
 }

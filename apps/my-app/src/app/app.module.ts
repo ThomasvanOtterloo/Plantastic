@@ -32,9 +32,12 @@ import { MatDialogModule} from '@angular/material/dialog';
 import { IncludeFriendsCheckboxComponent } from './products/filter/include-friends-checkbox/include-friends-checkbox.component';
 import {MAT_CHECKBOX_DEFAULT_OPTIONS, MatCheckboxDefaultOptions} from "@angular/material/checkbox";
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthService} from "@find-a-buddy/auth-ui";
-import { ConfigModule , CustomConfig} from "@find-a-buddy/util-ui";
+import {ConfigModule, CustomConfig, UtilUIModule} from "@find-a-buddy/util-ui";
+import {TokenInterceptor} from "../../token.interceptor";
+import { FollowUserComponent } from './follow-user/follow-user.component';
+import { OrderComponent } from './order/order.component';
 
 
 
@@ -45,6 +48,7 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'register', component: RegisterComponent},
   {path: 'sellers/create', component: CreateFormComponent},
+  {path: 'order', component: OrderComponent},
   {
     path: "sellers/:id",
     pathMatch: "full",
@@ -81,33 +85,39 @@ const routes: Routes = [
     OrderDialogComponent,
     AboutComponent,
     IncludeFriendsCheckboxComponent,
+    FollowUserComponent,
+    OrderComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    NgbModule,
-    BrowserAnimationsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatNativeDateModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatCheckboxModule,
-    HttpClientModule,
-    ConfigModule,
-    CustomConfig,
-    RouterModule.forRoot(routes),
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        NgbModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatNativeDateModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatCheckboxModule,
+        HttpClientModule,
+        ConfigModule,
+        CustomConfig,
+        RouterModule.forRoot(routes),
+        UtilUIModule,
+    ],
   exports: [
     RouterModule
   ],
 
   providers: [
+
     UserService,
     AuthService,
+      {provide: CustomConfig},
     {provide: MatDialogRef, useValue: {}},
     {provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'check' } as MatCheckboxDefaultOptions},
+    {provide: HTTP_INTERCEPTORS , useClass: TokenInterceptor, multi: true},
 
   ],
   bootstrap: [AppComponent]

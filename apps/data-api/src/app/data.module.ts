@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import {MongooseModule, Schema} from '@nestjs/mongoose';
 
 // import { TopicController } from './topic/topic.controller';
 // import { MeetupService } from './meetup/meetup.service';
@@ -13,29 +13,39 @@ import { User, UserSchema } from './user/user.schema';
 import { Product, ProductSchema } from './product/product.schema';
 import { UserController } from './user/user.controller';
 import { ProductController } from './product/product.controller';
-// import { MeetupController } from './meetup/meetup.controller';
+import {Review, ReviewSchema} from "./review/review.schema";
+import {ReviewController} from "./review/review.controller";
+import {ReviewService} from "./review/review.service";
+import {OrderController} from "./order/order.controller";
+import {OrderService} from "./order/order.service";
+import {Order, OrderSchema} from "./order/order.schema";
+import {Follow, FollowSchema} from "./friend/follow.schema";
+import {FollowService} from "./friend/follow.service";
+import {FollowController} from "./friend/follow.controller";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Product.name, schema: ProductSchema },
-      // { name: Topic.name, schema: TopicSchema },
-      // { name: Meetup.name, schema: MeetupSchema }
+      { name: Review.name, schema: ReviewSchema },
+      { name: Order.name, schema:  OrderSchema },
+      { name: Follow.name, schema: FollowSchema}
     ]),
   ],
   controllers: [
-    // MeetupController,
-    // TopicController,
     UserController,
-    ProductController
-
+    ProductController,
+    ReviewController,
+    OrderController,
+    FollowController
   ],
   providers: [
     UserService,
     ProductService,
-    // TopicService,
-    // MeetupService,
+    ReviewService,
+    OrderService,
+    FollowService
   ],
 })
 export class DataModule {}
