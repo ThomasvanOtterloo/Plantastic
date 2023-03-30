@@ -29,4 +29,4 @@ After cloning the repo you can run the Angular app in dev mode with `nx serve`.
 [Instructions for starting backend in dev mode]
 
 ## Deployment
-This app is continuously deployed... more details are to follow!
+https://coruscating-taiyaki-39382b.netlify.app/
