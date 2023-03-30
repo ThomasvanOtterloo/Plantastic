@@ -114,6 +114,7 @@ const routes: Routes = [
 
     UserService,
     AuthService,
+      {provide: CustomConfig},
     {provide: MatDialogRef, useValue: {}},
     {provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'check' } as MatCheckboxDefaultOptions},
     {provide: HTTP_INTERCEPTORS , useClass: TokenInterceptor, multi: true},
