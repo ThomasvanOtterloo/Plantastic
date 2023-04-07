@@ -29,7 +29,7 @@ export class OrderController {
     }
 
     @Delete(':id')
-    async delete(@InjectToken() token: Token,  @Param() orderId: string): Promise<Order> {
+    async delete(@InjectToken() token: Token,  @Param('id') orderId: string): Promise<Order> {
         try {
             return await this.orderService.delete(orderId, token);
         }

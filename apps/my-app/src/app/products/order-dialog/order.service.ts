@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Product, Review} from "@find-a-buddy/data";
+import {Product, Review, User} from "@find-a-buddy/data";
 import {UserInfo} from "@find-a-buddy/data";
 import {AlertService, ConfigService} from "@find-a-buddy/util-ui";
 import {BehaviorSubject, catchError, map, Observable, of} from "rxjs";
@@ -30,9 +30,16 @@ export class OrderService {
         return this.http.get<OrderBody>(`order/self`).pipe(
             map((body: OrderBody) => body.results)
 
-
         );
     }
+
+    deleteOrder(orderId: String) {
+        console.log(orderId)
+        return this.http.delete(`order/${orderId}`);
+
+    }
+
+
 }
 
 

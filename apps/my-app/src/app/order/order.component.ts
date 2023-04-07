@@ -21,8 +21,23 @@ export class OrderComponent implements OnInit {
         this.orderService.getOrders().pipe(
             map((orders: any) => {
                 this.orders = orders;
-                console.log(this.orders);
             }
         )).subscribe();
+    }
+
+    deleteOrder(orderId: string) {
+        this.orderService.deleteOrder(orderId).subscribe(
+            () => {
+                console.log(`Order with id ${orderId} deleted successfully`);
+                this.orderService.getOrders().pipe(
+                    map((orders: any) => {
+                            this.orders = orders;
+                        }
+                    )).subscribe();
+            },
+            (error) => {
+                console.log(`Error deleting order: ${error}`);
+            }
+        );
     }
 }

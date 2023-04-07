@@ -4,6 +4,7 @@ import {Product} from "../component-product-model";
 import {OrderService} from "./order.service";
 import {Order} from "@find-a-buddy/data";
 import { Router } from '@angular/router';
+import {UserService} from "../../authentication/user.service";
 
 @Component({
   selector: 'app-order-dialog',
@@ -12,7 +13,7 @@ import { Router } from '@angular/router';
 })
 export class OrderDialogComponent implements OnInit {
   product: Product | undefined;
-  wallet: number = 1000;
+  wallet: number = 50;
   quantity: number = 1;
     total: number = 0;
 
@@ -35,7 +36,6 @@ export class OrderDialogComponent implements OnInit {
   ngOnInit(): void {
     this.product = this.data.Product;
     console.log(this.product + "testing product");
-
   }
 
   onNoClick(): void {
